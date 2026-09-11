@@ -287,9 +287,79 @@ img {
   font-weight: 600;
 }
 
+/* ---------- Listings grid (eBay-synced pages) ---------- */
+/* Shared convention: any section listing items pulled from an external
+   source (eBay for jewelry/other now) can reuse this same grid/card
+   pattern plus the "last updated" + empty-state fallback styling. */
+
+.listings-page h1 {
+  margin-bottom: 8px;
+}
+
+.listings-page {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.listings-updated {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+  margin: 0 0 24px;
+}
+
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.listing-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-card__image {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(160deg, #cfc7b3, #efe9db) center/cover no-repeat;
+}
+
+.listing-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.listing-card__body h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.listing-card__price {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.listing-card__body .btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.listings-loading,
+.listings-empty {
+  color: var(--color-text-light);
+  grid-column: 1 / -1;
+}
+
 /* ---------- Stub / "coming soon" pages ---------- */
-/* Jewelry, Dog Treats, and Discussion are placeholders
-   until those sections get built in a future round. */
+/* Dog Treats and Discussion are placeholders until those
+   sections get built in a future round. */
 
 .stub-page {
   padding: 90px 20px;

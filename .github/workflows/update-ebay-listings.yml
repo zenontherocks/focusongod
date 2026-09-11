@@ -1,0 +1,38 @@
+name: Update eBay listings
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-listings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Fetch current eBay listings
+        run: python3 .github/scripts/update_ebay_listings.py
+
+      - name: Commit updated listings if changed
+        run: |
+          if git diff --quiet -- data/ebay-listings.json; then
+            echo "No changes to data/ebay-listings.json"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ebay-listings.json
+          git commit -m "Update eBay listings"
+          git push origin main
