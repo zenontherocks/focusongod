@@ -26,14 +26,22 @@ no code changes needed, the pages will pick them up automatically:
 (The other sections — jewelry, dog treats, discussion — will use the same
 `images/<section>/hero-bg.jpg` pattern once those pages are built.)
 
-## Adding the real payment links
+## Payment links
 
-In `index.html`, search for:
+The checkout buttons in `index.html` are already set to the $34.95 book price:
 
-- `PASTE_CASHAPP_LINK_HERE` — replace with your CashApp payment link
-- `PASTE_PAYPAL_LINK_HERE` — replace with your PayPal payment link
-- `PASTE_VENMO_LINK_HERE` — replace with your Venmo payment link
-- `PASTE_CONTACT_EMAIL_OR_HANDLE_HERE` — replace with a contact email/handle for order questions
+- CashApp: `https://cash.app/$FocusonGod4ever/34.95`
+- PayPal: `https://paypal.me/focusingongod/34.95`
+- Venmo: `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
+
+If the price changes, update both the `$34.95` shown in the "Get Your
+Copy" heading and the amount in each of the three links above.
+
+To change any of them later, open `index.html` and edit the `href` on the
+matching `btn--cashapp` / `btn--paypal` / `btn--venmo` link.
+
+Still pending: `PASTE_CONTACT_EMAIL_OR_HANDLE_HERE` — replace with a real
+contact email/handle for order questions.
 
 ## Shared navbar/footer
 
