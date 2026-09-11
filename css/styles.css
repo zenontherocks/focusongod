@@ -141,6 +141,94 @@ img {
   color: #fff;
 }
 
+.btn--primary {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- Shipping form ---------- */
+/* Shared convention: any section selling a physical item (book now;
+   jewelry/dog treats later) can reuse this same form + hide/reveal
+   pattern for collecting a shipping address before checkout. */
+
+.shipping {
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+  padding: 60px 20px;
+}
+
+.shipping h2 {
+  margin-top: 0;
+}
+
+.shipping-form {
+  max-width: 500px;
+  margin: 24px auto 0;
+  text-align: left;
+}
+
+.shipping-form__row {
+  margin-bottom: 16px;
+}
+
+.shipping-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 500px) {
+  .shipping-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shipping-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.shipping-form input,
+.shipping-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.shipping-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.shipping-form__status {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
+.shipping-form__status--success {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.shipping-form__status--error {
+  color: #b00020;
+  font-weight: 600;
+}
+
 /* ---------- Stub / "coming soon" pages ---------- */
 /* Jewelry, Dog Treats, and Discussion are placeholders
    until those sections get built in a future round. */
