@@ -6,8 +6,7 @@ in a browser to preview, or upload the whole folder to any static host
 
 ## Pages
 
-- `index.html` — home page
-- `book.html` — the book sale section (fully built)
+- `index.html` — the book sale section (fully built) — this is the site's landing page
 - `jewelry.html`, `dog-treats.html`, `discussion.html` — placeholder "coming soon" pages for future sections
 
 ## Editing text
@@ -29,7 +28,7 @@ no code changes needed, the pages will pick them up automatically:
 
 ## Adding the real payment links
 
-In `book.html`, search for:
+In `index.html`, search for:
 
 - `PASTE_CASHAPP_LINK_HERE` — replace with your CashApp payment link
 - `PASTE_PAYPAL_LINK_HERE` — replace with your PayPal payment link

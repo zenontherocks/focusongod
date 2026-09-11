@@ -5,8 +5,7 @@
 
 (function () {
   var links = [
-    { page: "home", href: "index.html", label: "Home" },
-    { page: "book", href: "book.html", label: "Book" },
+    { page: "book", href: "index.html", label: "Book" },
     { page: "jewelry", href: "jewelry.html", label: "Jewelry" },
     { page: "dog-treats", href: "dog-treats.html", label: "Dog Treats" },
     { page: "discussion", href: "discussion.html", label: "Discussion" }
