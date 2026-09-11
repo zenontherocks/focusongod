@@ -40,27 +40,17 @@ Copy" heading and the amount in each of the three links above.
 To change any of them later, open `index.html` and edit the `href` on the
 matching `btn--cashapp` / `btn--paypal` / `btn--venmo` link.
 
-## Setting up the shipping form (Formspree)
+## Shipping form (Formspree)
 
 Before payment, buyers fill out a name/address form so orders can actually
-be shipped. That form needs a one-time setup to start working:
-
-1. Go to [formspree.io](https://formspree.io) and sign up free (using
-   `focusingongod4ever@yahoo.com` makes sense, so submissions land in that
-   inbox).
-2. Create a new form. Formspree gives you an endpoint URL that looks like
-   `https://formspree.io/f/xxxxxxxx`.
-3. Open `index.html`, find `PASTE_FORMSPREE_FORM_ID_HERE` in the
-   `<form action="...">` line, and replace the whole placeholder URL with
-   your real endpoint.
-
-That's it — no other code changes needed. Every submission emails
-straight to the inbox you signed up with, and also shows up in your
+be shipped. It's already wired up to the real Formspree endpoint
+(`https://formspree.io/f/meaqdvbv`) — every submission emails straight to
+the inbox that endpoint was created with, and also shows up in the
 Formspree dashboard. The free tier allows 50 submissions/month, which
 resets monthly.
 
-Until the real endpoint is in place, submitting the form will show an
-error message (expected) instead of revealing the payment buttons.
+To point it at a different Formspree form later, open `index.html` and
+change the `action` URL on `<form id="shipping-form" ...>`.
 
 ## Shared navbar/footer
 
