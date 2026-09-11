@@ -32,6 +32,7 @@ In `index.html`, search for:
 
 - `PASTE_CASHAPP_LINK_HERE` — replace with your CashApp payment link
 - `PASTE_PAYPAL_LINK_HERE` — replace with your PayPal payment link
+- `PASTE_VENMO_LINK_HERE` — replace with your Venmo payment link
 - `PASTE_CONTACT_EMAIL_OR_HANDLE_HERE` — replace with a contact email/handle for order questions
 
 ## Shared navbar/footer

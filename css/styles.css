@@ -12,6 +12,7 @@
   --color-accent-light: #3f6350;
   --color-cashapp: #00d64f;
   --color-paypal: #003087;
+  --color-venmo: #3d95ce;
   --color-border: #ddd8cd;
   --max-width: 1100px;
   --radius: 10px;
@@ -132,6 +133,11 @@ img {
 
 .btn--paypal {
   background: var(--color-paypal);
+  color: #fff;
+}
+
+.btn--venmo {
+  background: var(--color-venmo);
   color: #fff;
 }
 
