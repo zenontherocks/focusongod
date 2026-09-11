@@ -26,31 +26,32 @@ no code changes needed, the pages will pick them up automatically:
 (The other sections — jewelry, dog treats, discussion — will use the same
 `images/<section>/hero-bg.jpg` pattern once those pages are built.)
 
-## Payment links
+## Checkout popup
 
-The checkout buttons in `index.html` are already set to the $34.95 book price:
+Clicking "Buy the Book" opens a popup (`#checkout-modal` in `index.html`,
+behavior in `js/checkout-modal.js`) with two steps shown one at a time in
+the same popup:
 
-- CashApp: `https://cash.app/$FocusonGod4ever/34.95`
-- PayPal: `https://paypal.me/focusingongod/34.95`
-- Venmo: `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
+1. **Shipping form** — collects name/address so orders can be shipped.
+   Submits to Formspree (`https://formspree.io/f/meaqdvbv`) over
+   `fetch`, so the page never reloads. Every submission emails straight
+   to the inbox that endpoint was created with, and also shows up in the
+   Formspree dashboard. Free tier: 50 submissions/month, resets monthly.
+   To point it at a different Formspree form later, change the `action`
+   URL on `<form id="shipping-form" ...>`.
+2. **Payment step** — shown automatically once the shipping form succeeds
+   (no page navigation, no second click). Has the three payment buttons,
+   already set to the $34.95 book price:
+   - CashApp: `https://cash.app/$FocusonGod4ever/34.95`
+   - PayPal: `https://paypal.me/focusingongod/34.95`
+   - Venmo: `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
 
-If the price changes, update both the `$34.95` shown in the "Get Your
-Copy" heading and the amount in each of the three links above.
+If the price changes, update the `$34.95` shown on both the "Buy the
+Book" button and the "Get Your Copy" heading, plus the amount in each of
+the three payment links — all in `index.html`.
 
-To change any of them later, open `index.html` and edit the `href` on the
-matching `btn--cashapp` / `btn--paypal` / `btn--venmo` link.
-
-## Shipping form (Formspree)
-
-Before payment, buyers fill out a name/address form so orders can actually
-be shipped. It's already wired up to the real Formspree endpoint
-(`https://formspree.io/f/meaqdvbv`) — every submission emails straight to
-the inbox that endpoint was created with, and also shows up in the
-Formspree dashboard. The free tier allows 50 submissions/month, which
-resets monthly.
-
-To point it at a different Formspree form later, open `index.html` and
-change the `action` URL on `<form id="shipping-form" ...>`.
+The popup closes via its X button, clicking outside it, or the Escape
+key, and returns focus to the "Buy the Book" button.
 
 ## Shared navbar/footer
 
