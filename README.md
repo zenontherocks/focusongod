@@ -7,7 +7,7 @@ in a browser to preview, or upload the whole folder to any static host
 ## Pages
 
 - `index.html` — the book sale section (fully built) — this is the site's landing page
-- `jewelry.html` — "Jewelry/Other for Sale" (fully built) — auto-synced from eBay, see below
+- `jewelry.html` — "Jewelry/Other for Sale" — currently just a link out to the eBay store; auto-sync is built but paused, see below
 - `dog-treats.html`, `discussion.html` — placeholder "coming soon" pages for future sections
 
 ## Editing text
@@ -54,32 +54,36 @@ the three payment links — all in `index.html`.
 The popup closes via its X button, clicking outside it, or the Escape
 key, and returns focus to the "Buy the Book" button.
 
-## Jewelry/Other for Sale (auto-synced from eBay)
+## Jewelry/Other for Sale (currently a link-out; auto-sync is paused)
 
-`jewelry.html` shows whatever is currently listed on the
-[eBay store](https://www.ebay.com/usr/northst9155) — no manual editing
-needed. This is kept fresh by:
+`jewelry.html` right now just points visitors to the
+[eBay store](https://www.ebay.com/usr/northst9155) directly with a
+plain link — no listing data is pulled into the site.
 
-- `.github/workflows/update-ebay-listings.yml` — a GitHub Action that
-  runs every 6 hours (and can be run on demand from the repo's Actions
-  tab via "Run workflow")
-- `.github/scripts/update_ebay_listings.py` — the script it runs, which
-  fetches eBay's RSS export of the seller's listings and writes
-  `data/ebay-listings.json`
-- `js/ebay-listings.js` — loads that JSON on page view and renders the
-  grid of cards (image, title, price, "View on eBay" button)
+An automated sync was built but is **paused** because eBay's
+bot-protection blocks the approach it used (scraping the RSS export of
+the seller's search results returns an HTTP 403 block page — confirmed,
+not a guess — and isn't fixable by adjusting request headers). The
+pieces are still in the repo, unused, ready to be revived once the
+seller signs up for eBay's official Developer API instead of scraping:
 
-If the Action's commit changes `data/ebay-listings.json`, the site
-redeploys automatically (Cloudflare Pages watches `main`) with the new
-listings — nobody needs to touch any code when he adds, removes, or
-reprices something on eBay.
+- `.github/workflows/update-ebay-listings.yml` — a GitHub Action
+  (schedule currently commented out; `workflow_dispatch` still works for
+  manual testing) meant to keep `data/ebay-listings.json` up to date
+- `.github/scripts/update_ebay_listings.py` — fetches and parses
+  eBay's RSS feed — **this is the part that needs replacing** with a
+  real eBay Browse API call once API credentials exist
+- `js/ebay-listings.js` — renders `data/ebay-listings.json` into a grid
+  of cards (image, title, price, "View on eBay" button) — not currently
+  linked from `jewelry.html`, but ready to reuse once there's real data
+  flowing into that JSON file again
 
-**Known fragility:** the script parses eBay's RSS feed with a couple of
-regular expressions. If eBay changes that feed's format, the Action will
-either fail outright (visible as a red run in the Actions tab) or parse
-zero items (logged as a warning, and it deliberately leaves the last
-good `data/ebay-listings.json` in place rather than blanking the page).
-Check the Action's run history if listings look stale.
+To pick this back up: get eBay Developer Program credentials (App ID +
+Cert ID) for the seller account, rework
+`update_ebay_listings.py` to call eBay's Browse API with those
+credentials instead of scraping RSS, re-enable the `schedule:` block in
+the workflow file, and swap `jewelry.html`'s content back to the
+`#ebay-listings-grid` + `js/ebay-listings.js` version.
 
 ## Shared navbar/footer
 

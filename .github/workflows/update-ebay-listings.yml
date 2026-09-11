@@ -1,8 +1,12 @@
 name: Update eBay listings
 
 on:
-  schedule:
-    - cron: "0 */6 * * *"
+  # Scheduled trigger is paused: the RSS-scraping approach this script used
+  # gets blocked by eBay's bot-protection (see git history / README for
+  # details). Re-enable the schedule below once the script is reworked to
+  # use the official eBay API instead.
+  # schedule:
+  #   - cron: "0 */6 * * *"
   workflow_dispatch: {}
 
 permissions:
