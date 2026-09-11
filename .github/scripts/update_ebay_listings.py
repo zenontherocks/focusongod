@@ -9,6 +9,7 @@ project has no other build tooling. Run by
 import json
 import re
 import sys
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -20,13 +21,29 @@ OUTPUT_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ebay-lis
 PRICE_RE = re.compile(r"(?:US\s*)?\$[\d,]+\.\d{2}")
 IMG_SRC_RE = re.compile(r'<img[^>]+src="([^"]+)"', re.IGNORECASE)
 
+REQUEST_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/rss+xml, application/xml, text/xml, */*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.ebay.com/",
+}
+
 
 def fetch_feed(url):
-    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        if response.status != 200:
-            raise RuntimeError(f"Unexpected status {response.status} fetching {url}")
-        return response.read()
+    request = urllib.request.Request(url, headers=REQUEST_HEADERS)
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            if response.status != 200:
+                raise RuntimeError(f"Unexpected status {response.status} fetching {url}")
+            return response.read()
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")[:1000]
+        raise RuntimeError(
+            f"HTTP {exc.code} {exc.reason} fetching {url}\nResponse body (truncated): {body}"
+        ) from exc
 
 
 def parse_items(rss_bytes):
