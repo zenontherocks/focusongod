@@ -1,0 +1,164 @@
+/* ============================================
+   Focus On God — global styles
+   Shared across every page. Page-specific styles
+   (like book.css) are linked in addition to this.
+   ============================================ */
+
+:root {
+  --color-bg: #f7f5f0;
+  --color-text: #232323;
+  --color-text-light: #5b5b5b;
+  --color-accent: #2f4a3e;
+  --color-accent-light: #3f6350;
+  --color-cashapp: #00d64f;
+  --color-paypal: #003087;
+  --color-border: #ddd8cd;
+  --max-width: 1100px;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ---------- Navbar ---------- */
+
+.navbar {
+  background: var(--color-accent);
+  padding: 14px 20px;
+}
+
+.navbar__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.navbar__brand {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.navbar__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__links a {
+  display: inline-block;
+  color: #f1f1f1;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.navbar__links a:hover {
+  background: var(--color-accent-light);
+}
+
+.navbar__links a.active {
+  background: #fff;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  margin-top: 60px;
+  padding: 24px 20px;
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1rem;
+  min-height: 44px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.btn--cashapp {
+  background: var(--color-cashapp);
+  color: #0a2913;
+}
+
+.btn--paypal {
+  background: var(--color-paypal);
+  color: #fff;
+}
+
+/* ---------- Stub / "coming soon" pages ---------- */
+/* Jewelry, Dog Treats, and Discussion are placeholders
+   until those sections get built in a future round. */
+
+.stub-page {
+  padding: 90px 20px;
+  text-align: center;
+}
+
+.stub-page h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  margin-bottom: 10px;
+}
+
+.stub-page p {
+  color: var(--color-text-light);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/*
+  Background image convention for every section (for future sessions):
+  images/<section>/hero-bg.jpg  — hero background photo
+  images/<section>/cover.jpg    — a featured product/detail photo (if applicable)
+  Drop a correctly-named file into the matching images/<section>/ folder
+  and it appears automatically — no CSS changes needed.
+*/

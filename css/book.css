@@ -1,0 +1,109 @@
+/* ============================================
+   Book page — hero, cover, and checkout styling.
+   Linked only from book.html.
+   ============================================ */
+
+.hero--book {
+  background:
+    url("../images/book/hero-bg.jpg") center/cover no-repeat,
+    linear-gradient(135deg, #1e2a38, #3a4a5c);
+  min-height: min(60vh, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  padding: 20px;
+}
+
+.hero--book::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.hero--book__content {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+}
+
+.hero--book__content h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  margin: 0 0 12px;
+}
+
+.hero--book__content p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 0;
+}
+
+.book-detail {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 60px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .book-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+.book-cover {
+  background:
+    url("../images/book/cover.jpg") center/cover no-repeat,
+    linear-gradient(160deg, #cfc7b3, #efe9db);
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.book-info h1 {
+  margin-top: 0;
+}
+
+.book-info .byline {
+  color: var(--color-text-light);
+  margin-top: -8px;
+  margin-bottom: 20px;
+}
+
+.checkout {
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.checkout h2 {
+  margin-top: 0;
+}
+
+.checkout__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+@media (max-width: 480px) {
+  .checkout__buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.checkout__note {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
