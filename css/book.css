@@ -70,9 +70,16 @@
   margin-top: 0;
 }
 
-.book-info .byline {
+.book-info__subtitle {
+  font-style: italic;
   color: var(--color-text-light);
   margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.book-info .byline {
+  color: var(--color-text-light);
+  margin-top: 0;
   margin-bottom: 20px;
 }
 
