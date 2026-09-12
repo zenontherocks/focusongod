@@ -8,7 +8,8 @@ in a browser to preview, or upload the whole folder to any static host
 
 - `index.html` — the book sale section (fully built) — this is the site's landing page
 - `jewelry.html` — "Jewelry/Other for Sale" — currently just a link out to the eBay store; auto-sync is built but paused, see below
-- `dog-treats.html`, `discussion.html` — placeholder "coming soon" pages for future sections
+- `dog-treats.html` — "Mack's Snacks" (fully built) — same hero/detail/checkout pattern as the book page, see below
+- `discussion.html` — placeholder "coming soon" page for a future section
 
 ## Editing text
 
@@ -23,15 +24,24 @@ no code changes needed, the pages will pick them up automatically:
 
 - `images/book/hero-bg.jpg` — background photo behind the book page's top banner
 - `images/book/cover.jpg` — the book cover photo
+- `images/dog-treats/hero-bg.jpg` — background photo behind the dog treats page's top banner
+- `images/dog-treats/cover.jpg` — a real product photo of the treats
 
-(The remaining sections — dog treats, discussion — will use the same
-`images/<section>/hero-bg.jpg` pattern once those pages are built.)
+Until real dog treats photos exist, both of those spots show
+`images/dog-treats/placeholder.svg` (a simple drawn dog-bone graphic) as
+a stand-in — it's a second background layer behind the `hero-bg.jpg` /
+`cover.jpg` slot, so dropping in the real photos with those exact
+filenames works with zero code changes, same as everywhere else.
+
+(`discussion.html` will use the same `images/<section>/hero-bg.jpg`
+pattern once that page is built.)
 
 ## Checkout popup
 
-Clicking "Buy the Book" opens a popup (`#checkout-modal` in `index.html`,
-behavior in `js/checkout-modal.js`) with two steps shown one at a time in
-the same popup:
+Both the book (`index.html`) and dog treats (`dog-treats.html`) pages
+use the same pattern: clicking the "Buy" button opens a popup
+(`#checkout-modal`, behavior in `js/checkout-modal.js`, shared by both
+pages) with two steps shown one at a time in the same popup:
 
 1. **Shipping form** — collects name/address so orders can be shipped.
    Submits to Formspree (`https://formspree.io/f/meaqdvbv`) over
@@ -39,20 +49,23 @@ the same popup:
    to the inbox that endpoint was created with, and also shows up in the
    Formspree dashboard. Free tier: 50 submissions/month, resets monthly.
    To point it at a different Formspree form later, change the `action`
-   URL on `<form id="shipping-form" ...>`.
+   URL on `<form id="shipping-form" ...>`. The dog treats page's form
+   also sets a hidden `_subject` field so those emails arrive labeled
+   "New order: Dog Treats" instead of looking like book orders.
 2. **Payment step** — shown automatically once the shipping form succeeds
-   (no page navigation, no second click). Has the three payment buttons,
-   already set to the $34.95 book price:
-   - CashApp: `https://cash.app/$FocusonGod4ever/34.95`
-   - PayPal: `https://paypal.me/focusingongod/34.95`
-   - Venmo: `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
+   (no page navigation, no second click). Has the three payment buttons:
+   - Book ($34.95): `https://cash.app/$FocusonGod4ever/34.95`,
+     `https://paypal.me/focusingongod/34.95`,
+     `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
+   - Dog Treats ($27.49): same three accounts with `/27.49` amounts and
+     `note=Dog+Treats` on the Venmo link
 
-If the price changes, update the `$34.95` shown on both the "Buy the
-Book" button and the "Get Your Copy" heading, plus the amount in each of
-the three payment links — all in `index.html`.
+If a price changes, update it in three places on that page: the "Buy"
+button text, the "Get Your Copy"/"Get Your Treats" heading, and the
+amount in each of the three payment links.
 
 The popup closes via its X button, clicking outside it, or the Escape
-key, and returns focus to the "Buy the Book" button.
+key, and returns focus to the button that opened it.
 
 ## Jewelry/Other for Sale (currently a link-out; auto-sync is paused)
 

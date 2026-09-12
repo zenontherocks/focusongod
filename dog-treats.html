@@ -3,18 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dog Treats — Focus On God</title>
+  <title>Mack's Snacks — Focus On God</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/dog-treats.css" />
 </head>
 <body data-page="dog-treats">
   <div id="site-navbar"></div>
 
-  <main class="stub-page">
-    <h1>Dog Treats</h1>
-    <p>Homemade dog treats will be available here soon. Check back shortly!</p>
-  </main>
+  <section class="hero--treats">
+    <div class="hero--treats__content">
+      <h1>Mack's Snacks</h1>
+      <p>A house is not a home without paw prints.</p>
+    </div>
+  </section>
+
+  <section class="treats-detail">
+    <div class="treats-cover"></div>
+    <div class="treats-info">
+      <h1>Mack's Snacks</h1>
+      <p class="treats-info__subtitle">A house is not a home without paw prints.</p>
+
+      <p>
+        He’s your best friend, he never leaves your side, he protects
+        you. Why would you feed him toxic chemicals and animal parts
+        scraped off an industrial floor. He deserves better. He deserves
+        the best.
+      </p>
+
+      <blockquote class="treats-info__quote">
+        <p>“A righteous man regards the life of his animal,”</p>
+        <footer>—Proverbs 12:10</footer>
+      </blockquote>
+
+      <p>
+        All natural doggo treats. Five simple ingredients: organic
+        unbleached flour, organic flaxseed meal, organic peanut butter,
+        all natural pumpkin, and honey. 2lbs (910g) of treats per bag.
+        $27.49 (includes shipping)
+      </p>
+
+      <p>
+        The ingredients are not chosen at random they are purposely
+        selected for their health benefits for dogs. I am a personal
+        experience of a Doggo with health issues, one of my dogs has
+        seizure problems and we found the solution to the honey. List
+        benefits of ingredients; honey helps with seizures and such
+      </p>
+
+      <p>
+        Pumpkin is beneficial for dogs as it is rich in fiber, which
+        aids digestion and can help with both diarrhea and constipation.
+        It also contains essential vitamins and minerals that support
+        immune health, skin and coat condition, and overall well-being.
+      </p>
+
+      <p>
+        Whole wheat flour is beneficial for dogs as it contains fiber,
+        vitamins, and minerals that support digestion and overall
+        health. It can help maintain healthy skin, promote a balanced
+        diet, and provide essential nutrients.
+      </p>
+
+      <p>
+        Flaxseed is good for dogs in small amounts as it provides
+        health benefits such as improved skin and coat health,
+        digestive support, and anti-inflammatory properties
+      </p>
+
+      <p>
+        Peanut butter can be a nutritious treat for dogs, providing
+        protein, healthy fats, and essential vitamins like B and E. It
+        can also help with mental stimulation and serve as a tasty way
+        to administer medication, but should be given in moderation and
+        without harmful additives like xylitol.
+      </p>
+
+      <p>
+        Honey can provide several health benefits for dogs, including
+        boosting their immune system, helping with seasonal allergies,
+        and promoting healing for minor wounds and skin irritations. It
+        also has antimicrobial properties and can aid in digestion,
+        making it a beneficial occasional treat when given in
+        moderation.
+      </p>
+
+      <p>
+        For maximum pawsomeness, keep in freezer not only to extend
+        shelf life but more importantly to give it the extra snap and
+        crunch that dogs love, it adds to their enjoyment big time.
+      </p>
+
+      <div class="buy-cta">
+        <button type="button" id="open-checkout" class="btn btn--primary">
+          Buy the Treats — $27.49
+        </button>
+        <p class="buy-cta__note">We accept payment via PayPal, CashApp, or Venmo.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="checkout-modal" class="modal" hidden>
+    <div class="modal__overlay" data-close-modal></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
+      <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
+
+      <div id="modal-step-shipping">
+        <h2 id="checkout-modal-title">Shipping Details</h2>
+        <p>Fill this out first so we know where to send your treats, then choose how you'd like to pay.</p>
+
+        <form id="shipping-form" class="shipping-form" action="https://formspree.io/f/meaqdvbv" method="POST">
+          <input type="hidden" name="_subject" value="New order: Dog Treats ($27.49)" />
+          <div class="shipping-form__row">
+            <label for="ship-name">Full Name *</label>
+            <input type="text" id="ship-name" name="name" required />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-email">Email (optional)</label>
+            <input type="email" id="ship-email" name="email" />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-address1">Address Line 1 *</label>
+            <input type="text" id="ship-address1" name="address_line_1" required />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-address2">Address Line 2</label>
+            <input type="text" id="ship-address2" name="address_line_2" />
+          </div>
+          <div class="shipping-form__grid">
+            <div class="shipping-form__row">
+              <label for="ship-city">City *</label>
+              <input type="text" id="ship-city" name="city" required />
+            </div>
+            <div class="shipping-form__row">
+              <label for="ship-state">State *</label>
+              <input type="text" id="ship-state" name="state" required />
+            </div>
+            <div class="shipping-form__row">
+              <label for="ship-zip">ZIP *</label>
+              <input type="text" id="ship-zip" name="zip" required />
+            </div>
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-note">Order Note (optional)</label>
+            <textarea id="ship-note" name="note" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn--primary">Continue to Payment</button>
+          <p class="shipping-form__status" role="status"></p>
+        </form>
+      </div>
+
+      <div id="modal-step-payment" hidden>
+        <h2>Get Your Treats — $27.49</h2>
+        <p>Choose how you'd like to pay:</p>
+        <div class="checkout__buttons">
+          <a class="btn btn--cashapp" href="https://cash.app/$FocusonGod4ever/27.49" target="_blank" rel="noopener">
+            Buy with CashApp
+          </a>
+          <a class="btn btn--paypal" href="https://paypal.me/focusingongod/27.49" target="_blank" rel="noopener">
+            Buy with PayPal
+          </a>
+          <a class="btn btn--venmo" href="https://venmo.com/u/irishjam7?txn=pay&amp;amount=27.49&amp;note=Dog+Treats" target="_blank" rel="noopener">
+            Buy with Venmo
+          </a>
+        </div>
+        <p class="checkout__note">
+          Questions or delivery details? Contact
+          <a href="mailto:focusingongod4ever@yahoo.com">focusingongod4ever@yahoo.com</a>
+        </p>
+      </div>
+    </div>
+  </div>
 
   <div id="site-footer"></div>
   <script src="js/site-shell.js"></script>
+  <script src="js/checkout-modal.js"></script>
 </body>
 </html>

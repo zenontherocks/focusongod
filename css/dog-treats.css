@@ -1,0 +1,130 @@
+/* ============================================
+   Dog Treats page — hero, cover, and checkout styling.
+   Linked only from dog-treats.html. Mirrors css/book.css's
+   pattern with its own class names (kept separate rather than
+   shared, so nothing here can regress the book page).
+   ============================================ */
+
+.hero--treats {
+  background:
+    url("../images/dog-treats/hero-bg.jpg") center/cover no-repeat,
+    url("../images/dog-treats/placeholder.svg") center/cover no-repeat;
+  min-height: min(60vh, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  padding: 20px;
+}
+
+.hero--treats::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.hero--treats__content {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+}
+
+.hero--treats__content h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  margin: 0 0 12px;
+}
+
+.hero--treats__content p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 0;
+}
+
+.treats-detail {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 60px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .treats-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+.treats-cover {
+  background:
+    url("../images/dog-treats/cover.jpg") center/cover no-repeat,
+    url("../images/dog-treats/placeholder.svg") center/cover no-repeat;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.treats-info h1 {
+  margin-top: 0;
+}
+
+.treats-info__subtitle {
+  font-style: italic;
+  color: var(--color-text-light);
+  margin-top: -8px;
+  margin-bottom: 20px;
+}
+
+.treats-info__quote {
+  margin: 24px 0;
+  padding-left: 20px;
+  border-left: 3px solid var(--color-accent);
+  font-style: italic;
+}
+
+.treats-info__quote p {
+  margin: 0;
+}
+
+.treats-info__quote footer {
+  margin-top: 8px;
+  font-style: normal;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+.checkout {
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.checkout h2 {
+  margin-top: 0;
+}
+
+.checkout__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+@media (max-width: 480px) {
+  .checkout__buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.checkout__note {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  max-width: 480px;
+  margin: 0 auto;
+}

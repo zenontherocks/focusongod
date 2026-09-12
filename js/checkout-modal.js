@@ -18,7 +18,7 @@
     var submitBtn = form.querySelector('button[type="submit"]');
 
     var FOCUSABLE_SELECTOR =
-      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     function focusableElements() {
       return dialog.querySelectorAll(FOCUSABLE_SELECTOR);
