@@ -39,31 +39,50 @@ pattern once that page is built.)
 
 ## Checkout popup
 
-Both the book (`index.html`) and dog treats (`dog-treats.html`) pages
-use the same pattern: clicking the "Buy" button opens a popup
-(`#checkout-modal`, behavior in `js/checkout-modal.js`, shared by both
-pages) with two steps shown one at a time in the same popup:
+The book (`index.html`), dog treats (`dog-treats.html`), and jewelry
+(`jewelry.html`) pages all share one popup pattern, driven by a single
+script: `js/checkout-modal.js`. Each page has its own `#checkout-modal`
+markup (same structure every time — copy it from an existing page if a
+new section needs it), and any number of `.buy-button` elements telling
+the modal what to sell. A button's `data-item-*` attributes are all the
+script needs:
+
+- `data-item-title` — used to build the order subject and the Venmo note
+- `data-item-price` — a plain number string, e.g. `"34.95"`
+- `data-item-subject` — text for the shipping form's hidden `_subject`
+  field, so Formspree emails arrive labeled with what was ordered
+- `data-item-heading` (optional) — payment-step heading prefix, defaults
+  to "Complete Your Purchase" if omitted
+
+Book and dog treats each have one hardcoded `.buy-button` with these
+attributes set directly in the HTML. The jewelry page instead has one
+per listing, rendered dynamically by `js/jewelry-listings.js` from
+whatever's in `data/jewelry-listings.json` — so its payment links and
+subject line are always correct without any code changes when a listing
+is added, priced, or removed through `admin.html`.
+
+Clicking any `.buy-button` opens the shared popup to two steps shown one
+at a time:
 
 1. **Shipping form** — collects name/address so orders can be shipped.
    Submits to Formspree (`https://formspree.io/f/meaqdvbv`) over
    `fetch`, so the page never reloads. Every submission emails straight
    to the inbox that endpoint was created with, and also shows up in the
    Formspree dashboard. Free tier: 50 submissions/month, resets monthly.
-   To point it at a different Formspree form later, change the `action`
-   URL on `<form id="shipping-form" ...>`. The dog treats page's form
-   also sets a hidden `_subject` field so those emails arrive labeled
-   "New order: Dog Treats" instead of looking like book orders.
+   To point every page at a different Formspree form later, change the
+   `action` URL on each page's `<form id="shipping-form" ...>`.
 2. **Payment step** — shown automatically once the shipping form succeeds
-   (no page navigation, no second click). Has the three payment buttons:
-   - Book ($34.95): `https://cash.app/$FocusonGod4ever/34.95`,
-     `https://paypal.me/focusingongod/34.95`,
-     `https://venmo.com/u/irishjam7?txn=pay&amount=34.95&note=Book`
-   - Dog Treats ($27.49): same three accounts with `/27.49` amounts and
-     `note=Dog+Treats` on the Venmo link
+   (no page navigation, no second click). Has the three payment buttons
+   (CashApp, PayPal, Venmo), all pointed at the same three accounts —
+   `$FocusonGod4ever`, `focusingongod`, and `irishjam7` respectively —
+   with the amount and Venmo note filled in from whichever `.buy-button`
+   was clicked.
 
-If a price changes, update it in three places on that page: the "Buy"
-button text, the "Get Your Copy"/"Get Your Treats" heading, and the
-amount in each of the three payment links.
+To change a book/dog-treats price, just update that page's one
+`.buy-button`'s `data-item-price` (and the button's own visible text,
+which isn't derived automatically since it doesn't need to be). Jewelry
+prices are set per-listing through `admin.html` and need no HTML edits
+at all.
 
 The popup closes via its X button, clicking outside it, or the Escape
 key, and returns focus to the button that opened it.

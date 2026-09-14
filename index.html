@@ -71,7 +71,14 @@
       </p>
 
       <div class="buy-cta">
-        <button type="button" id="open-checkout" class="btn btn--primary">
+        <button
+          type="button"
+          class="btn btn--primary buy-button"
+          data-item-title="F.O.G. Focusing On God — Living a Godly Life in a Fallen World"
+          data-item-price="34.95"
+          data-item-subject="New order: Book ($34.95)"
+          data-item-heading="Get Your Copy"
+        >
           Buy the Book — $34.95
         </button>
         <p class="buy-cta__note">We accept payment via PayPal, CashApp, or Venmo.</p>
@@ -89,6 +96,7 @@
         <p>Fill this out first so we know where to send your book, then choose how you'd like to pay.</p>
 
         <form id="shipping-form" class="shipping-form" action="https://formspree.io/f/meaqdvbv" method="POST">
+          <input type="hidden" id="shipping-form-subject" name="_subject" value="" />
           <div class="shipping-form__row">
             <label for="ship-name">Full Name *</label>
             <input type="text" id="ship-name" name="name" required />
@@ -130,16 +138,16 @@
       </div>
 
       <div id="modal-step-payment" hidden>
-        <h2>Get Your Copy — $34.95</h2>
+        <h2 id="modal-payment-heading">Get Your Copy — $34.95</h2>
         <p>Choose how you'd like to pay:</p>
         <div class="checkout__buttons">
-          <a class="btn btn--cashapp" href="https://cash.app/$FocusonGod4ever/34.95" target="_blank" rel="noopener">
+          <a id="pay-cashapp" class="btn btn--cashapp" href="#" target="_blank" rel="noopener">
             Buy with CashApp
           </a>
-          <a class="btn btn--paypal" href="https://paypal.me/focusingongod/34.95" target="_blank" rel="noopener">
+          <a id="pay-paypal" class="btn btn--paypal" href="#" target="_blank" rel="noopener">
             Buy with PayPal
           </a>
-          <a class="btn btn--venmo" href="https://venmo.com/u/irishjam7?txn=pay&amp;amount=34.95&amp;note=Book" target="_blank" rel="noopener">
+          <a id="pay-venmo" class="btn btn--venmo" href="#" target="_blank" rel="noopener">
             Buy with Venmo
           </a>
         </div>

@@ -96,35 +96,3 @@
   color: var(--color-text-light);
 }
 
-.checkout {
-  background: #fff;
-  border-top: 1px solid var(--color-border);
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.checkout h2 {
-  margin-top: 0;
-}
-
-.checkout__buttons {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin: 24px 0;
-}
-
-@media (max-width: 480px) {
-  .checkout__buttons {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-.checkout__note {
-  color: var(--color-text-light);
-  font-size: 0.9rem;
-  max-width: 480px;
-  margin: 0 auto;
-}

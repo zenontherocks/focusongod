@@ -287,6 +287,28 @@ img {
   font-weight: 600;
 }
 
+.checkout__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+@media (max-width: 480px) {
+  .checkout__buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.checkout__note {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
 /* ---------- Listings grid (eBay-synced pages) ---------- */
 /* Shared convention: any section listing items pulled from an external
    source (eBay for jewelry/other now) can reuse this same grid/card

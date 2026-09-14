@@ -1,21 +1,44 @@
-// Drives the "Buy the Book" popup: open/close behavior, a basic focus
+// Drives every page's "Buy" popup: open/close behavior, a basic focus
 // trap while it's open, and the shipping form's Formspree submission
 // which clicks through to the payment step inside the same modal.
+//
+// Shared by every page that sells something (book, dog treats, and
+// each jewelry listing): each page provides one `#checkout-modal` and
+// any number of `.buy-button` elements. A button's data-item-* attributes
+// tell the modal what to show when it's clicked:
+//   data-item-title    (required) — used in the order subject
+//   data-item-price    (required) — plain number string, e.g. "34.95"
+//   data-item-subject  (required) — text for the shipping form's hidden
+//                                    _subject field, so Formspree emails
+//                                    arrive labeled with what was ordered
+//   data-item-heading  (optional) — payment-step heading prefix, defaults
+//                                    to "Complete Your Purchase"
+//
 // See README.md for how to set up the real Formspree endpoint.
 
 (function () {
+  var CASHAPP_HANDLE = "$FocusonGod4ever";
+  var PAYPAL_HANDLE = "focusingongod";
+  var VENMO_HANDLE = "irishjam7";
+  var DEFAULT_HEADING = "Complete Your Purchase";
+
   document.addEventListener("DOMContentLoaded", function () {
-    var openBtn = document.getElementById("open-checkout");
     var modal = document.getElementById("checkout-modal");
-    if (!openBtn || !modal) return;
+    if (!modal) return;
 
     var dialog = modal.querySelector(".modal__dialog");
     var closeTriggers = modal.querySelectorAll("[data-close-modal]");
     var shippingStep = document.getElementById("modal-step-shipping");
     var paymentStep = document.getElementById("modal-step-payment");
+    var paymentHeading = document.getElementById("modal-payment-heading");
+    var subjectField = document.getElementById("shipping-form-subject");
+    var cashappLink = document.getElementById("pay-cashapp");
+    var paypalLink = document.getElementById("pay-paypal");
+    var venmoLink = document.getElementById("pay-venmo");
     var form = document.getElementById("shipping-form");
     var statusEl = form.querySelector(".shipping-form__status");
     var submitBtn = form.querySelector('button[type="submit"]');
+    var openerButton = null;
 
     var FOCUSABLE_SELECTOR =
       'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -34,10 +57,39 @@
       }
     }
 
-    function openModal() {
+    function setPaymentDetails(button) {
+      var title = button.getAttribute("data-item-title") || "";
+      var price = button.getAttribute("data-item-price") || "0";
+      var subject = button.getAttribute("data-item-subject") || "New order: " + title;
+      var heading = button.getAttribute("data-item-heading") || DEFAULT_HEADING;
+      var amount = (Number(price) || 0).toFixed(2);
+
+      subjectField.value = subject;
+      paymentHeading.textContent = heading + " — $" + amount;
+      cashappLink.href = "https://cash.app/" + CASHAPP_HANDLE + "/" + amount;
+      paypalLink.href = "https://paypal.me/" + PAYPAL_HANDLE + "/" + amount;
+      venmoLink.href =
+        "https://venmo.com/u/" +
+        VENMO_HANDLE +
+        "?txn=pay&amount=" +
+        amount +
+        "&note=" +
+        encodeURIComponent(title);
+    }
+
+    function openModal(button) {
+      openerButton = button;
+      form.reset();
+      setPaymentDetails(button);
+      shippingStep.hidden = false;
+      paymentStep.hidden = true;
+      statusEl.textContent = "";
+      statusEl.className = "shipping-form__status";
+      submitBtn.disabled = false;
+
       modal.hidden = false;
       document.body.style.overflow = "hidden";
-      focusFirstIn(shippingStep.hidden ? paymentStep : shippingStep);
+      focusFirstIn(shippingStep);
       document.addEventListener("keydown", onKeydown);
     }
 
@@ -45,7 +97,7 @@
       modal.hidden = true;
       document.body.style.overflow = "";
       document.removeEventListener("keydown", onKeydown);
-      openBtn.focus();
+      if (openerButton) openerButton.focus();
     }
 
     function onKeydown(event) {
@@ -69,7 +121,11 @@
       }
     }
 
-    openBtn.addEventListener("click", openModal);
+    document.addEventListener("click", function (event) {
+      var button = event.target.closest(".buy-button");
+      if (button) openModal(button);
+    });
+
     closeTriggers.forEach(function (trigger) {
       trigger.addEventListener("click", closeModal);
     });

@@ -19,8 +19,82 @@
     </div>
   </main>
 
+  <div id="checkout-modal" class="modal" hidden>
+    <div class="modal__overlay" data-close-modal></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
+      <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
+
+      <div id="modal-step-shipping">
+        <h2 id="checkout-modal-title">Shipping Details</h2>
+        <p>Fill this out first so we know where to send your item, then choose how you'd like to pay.</p>
+
+        <form id="shipping-form" class="shipping-form" action="https://formspree.io/f/meaqdvbv" method="POST">
+          <input type="hidden" id="shipping-form-subject" name="_subject" value="" />
+          <div class="shipping-form__row">
+            <label for="ship-name">Full Name *</label>
+            <input type="text" id="ship-name" name="name" required />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-email">Email (optional)</label>
+            <input type="email" id="ship-email" name="email" />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-address1">Address Line 1 *</label>
+            <input type="text" id="ship-address1" name="address_line_1" required />
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-address2">Address Line 2</label>
+            <input type="text" id="ship-address2" name="address_line_2" />
+          </div>
+          <div class="shipping-form__grid">
+            <div class="shipping-form__row">
+              <label for="ship-city">City *</label>
+              <input type="text" id="ship-city" name="city" required />
+            </div>
+            <div class="shipping-form__row">
+              <label for="ship-state">State *</label>
+              <input type="text" id="ship-state" name="state" required />
+            </div>
+            <div class="shipping-form__row">
+              <label for="ship-zip">ZIP *</label>
+              <input type="text" id="ship-zip" name="zip" required />
+            </div>
+          </div>
+          <div class="shipping-form__row">
+            <label for="ship-note">Order Note (optional)</label>
+            <textarea id="ship-note" name="note" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn--primary">Continue to Payment</button>
+          <p class="shipping-form__status" role="status"></p>
+        </form>
+      </div>
+
+      <div id="modal-step-payment" hidden>
+        <h2 id="modal-payment-heading">Complete Your Purchase</h2>
+        <p>Choose how you'd like to pay:</p>
+        <div class="checkout__buttons">
+          <a id="pay-cashapp" class="btn btn--cashapp" href="#" target="_blank" rel="noopener">
+            Buy with CashApp
+          </a>
+          <a id="pay-paypal" class="btn btn--paypal" href="#" target="_blank" rel="noopener">
+            Buy with PayPal
+          </a>
+          <a id="pay-venmo" class="btn btn--venmo" href="#" target="_blank" rel="noopener">
+            Buy with Venmo
+          </a>
+        </div>
+        <p class="checkout__note">
+          Questions or delivery details? Contact
+          <a href="mailto:focusingongod4ever@yahoo.com">focusingongod4ever@yahoo.com</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <div id="site-footer"></div>
   <script src="js/site-shell.js"></script>
   <script src="js/jewelry-listings.js"></script>
+  <script src="js/checkout-modal.js"></script>
 </body>
 </html>
