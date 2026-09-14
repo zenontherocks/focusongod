@@ -1,19 +1,22 @@
 // Renders the jewelry/other-for-sale page's listings grid from
-// data/ebay-listings.json, which .github/workflows/update-ebay-listings.yml
-// keeps updated automatically from the seller's real eBay listings.
+// data/jewelry-listings.json, which the admin console (admin.html,
+// js/admin.js, functions/api/jewelry-*.js) keeps updated.
 
 (function () {
-  var EBAY_STORE_URL = "https://www.ebay.com/usr/northst9155";
-
   function escapeHtml(value) {
     var div = document.createElement("div");
     div.textContent = value == null ? "" : value;
     return div.innerHTML;
   }
 
+  function formatPrice(value) {
+    var num = Number(value);
+    return isNaN(num) ? "" : "$" + num.toFixed(2);
+  }
+
   function renderCard(item) {
     var imageStyle = item.image
-      ? ' style="background-image: url(\'' + escapeHtml(item.image) + '\')"'
+      ? ' style="background-image: url(\'' + escapeHtml(item.image) + "')\""
       : "";
     return (
       '<div class="listing-card">' +
@@ -24,24 +27,17 @@
       "<h3>" +
       escapeHtml(item.title) +
       "</h3>" +
-      (item.price ? '<p class="listing-card__price">' + escapeHtml(item.price) + "</p>" : "") +
-      '<a class="btn btn--primary" href="' +
-      escapeHtml(item.url) +
-      '" target="_blank" rel="noopener">View on eBay</a>' +
+      '<p class="listing-card__price">' +
+      formatPrice(item.price) +
+      "</p>" +
+      (item.description ? "<p>" + escapeHtml(item.description) + "</p>" : "") +
       "</div>" +
       "</div>"
     );
   }
 
   function renderEmptyState() {
-    return (
-      '<p class="listings-empty">' +
-      "Listings aren't available here right now. In the meantime, " +
-      '<a href="' +
-      EBAY_STORE_URL +
-      '" target="_blank" rel="noopener">visit our eBay store directly</a>.' +
-      "</p>"
-    );
+    return '<p class="listings-empty">No listings yet &mdash; check back soon!</p>';
   }
 
   function formatUpdatedAt(isoString) {
@@ -52,11 +48,11 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    var grid = document.getElementById("ebay-listings-grid");
+    var grid = document.getElementById("listings-grid");
     var updatedEl = document.getElementById("listings-updated");
     if (!grid) return;
 
-    fetch("data/ebay-listings.json")
+    fetch("data/jewelry-listings.json?_=" + Date.now())
       .then(function (response) {
         if (!response.ok) throw new Error("Failed to load listings");
         return response.json();

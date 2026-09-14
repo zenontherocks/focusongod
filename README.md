@@ -7,8 +7,9 @@ in a browser to preview, or upload the whole folder to any static host
 ## Pages
 
 - `index.html` — the book sale section (fully built) — this is the site's landing page
-- `jewelry.html` — "Jewelry/Other for Sale" — currently just a link out to the eBay store; auto-sync is built but paused, see below
+- `jewelry.html` — "Jewelry/Other for Sale" (fully built) — listings managed via `admin.html`, see below
 - `dog-treats.html` — "Mack's Snacks" (fully built) — same hero/detail/checkout pattern as the book page, see below
+- `admin.html` — password-protected console for adding/removing jewelry listings, see below
 - `discussion.html` — placeholder "coming soon" page for a future section
 
 ## Editing text
@@ -67,40 +68,64 @@ amount in each of the three payment links.
 The popup closes via its X button, clicking outside it, or the Escape
 key, and returns focus to the button that opened it.
 
-## Jewelry/Other for Sale (auto-synced from eBay via the Browse API)
+## Jewelry/Other for Sale — admin console (no eBay involved)
 
-`jewelry.html` shows whatever is currently listed on the
-[eBay store](https://www.ebay.com/usr/northst9155) — no manual editing
-needed. An earlier version of this tried scraping eBay's RSS feed
-directly and got blocked by eBay's bot-protection (HTTP 403 — confirmed
-via the Action's logs, not fixable by adjusting headers). It's now
-rebuilt on eBay's official **Browse API**, authenticated with real
-Developer Program credentials:
+An eBay-based sync was tried and abandoned (bot-protection blocked
+scraping, and once switched to eBay's official API, the seller's
+Production keyset turned out to be disabled pending an eBay compliance
+process he didn't want to deal with). `jewelry.html` is now fully
+self-hosted: listings live in `data/jewelry-listings.json`, managed
+through `admin.html`, a password-protected page for adding and
+removing listings — no third party involved at all.
 
-- `.github/workflows/update-ebay-listings.yml` — a GitHub Action that
-  runs the script below. Schedule is **paused** (commented out) until a
-  manual run has been verified to work end-to-end; `workflow_dispatch`
-  is enabled for that manual test. Once verified, uncomment the
-  `schedule:` block to run automatically (every 6 hours by default).
-- `.github/scripts/update_ebay_listings.py` — logs in to eBay's API
-  using the OAuth Client Credentials flow, searches for the seller's
-  active items (`filter=sellers:{northst9155}` on the Browse API's
-  `item_summary/search` endpoint, paginated), and writes
-  `data/ebay-listings.json`. Requires two **repository secrets**:
-  `EBAY_APP_ID` and `EBAY_CERT_ID` (the seller's Production App ID /
-  Cert ID from developer.ebay.com — already added as of this writing).
-  A failure (bad credentials, API error) fails the Action run loudly; a
-  successful call that finds zero items logs a warning and leaves the
-  existing data file untouched, rather than blanking the page.
-- `js/ebay-listings.js` — renders `data/ebay-listings.json` into a grid
-  of cards (image, title, price, "View on eBay" button), with a
-  fallback message linking to the eBay store directly if the data isn't
-  available for any reason.
+**How it works:**
 
-If the Action's commit changes `data/ebay-listings.json`, the site
-redeploys automatically (Cloudflare Pages watches `main`) with the new
-listings — nobody needs to touch any code when the seller adds,
-removes, or reprices something on eBay.
+- `admin.html` + `js/admin.js` — the console itself. Enter the admin
+  password once (stored in `sessionStorage`, so it's re-asked each new
+  browser session) to unlock a form (photo, title, optional
+  description, price) and a list of current listings with a Delete
+  button on each. Photos are resized/compressed client-side (max 1200px
+  on the long edge, JPEG) before upload, to keep things fast and the
+  repo lean.
+- `functions/api/jewelry-create.js`, `functions/api/jewelry-delete.js`,
+  `functions/api/jewelry-auth-check.js` — Cloudflare Pages Functions
+  (serverless, run by Cloudflare, not a separate server to manage).
+  They check the password, then use the GitHub Contents API to commit
+  the new/removed image and the updated `data/jewelry-listings.json`
+  **directly to `main`** — which triggers a normal Cloudflare Pages
+  deploy, same as any other change to this site. That means a new or
+  deleted listing takes roughly **30-90 seconds** to actually appear
+  live (a real deploy happens) — that's expected, not a bug.
+- `js/jewelry-listings.js` — renders `data/jewelry-listings.json` into
+  the grid of cards on `jewelry.html` (image, title, price,
+  description).
+
+**One-time setup required** (two secrets in the Cloudflare Pages
+dashboard — Workers & Pages → this project → Settings → Environment
+variables — **not** GitHub secrets, a different place):
+
+- `ADMIN_PASSWORD` — whatever password should unlock `admin.html`.
+  Pick something only you and your friend know.
+- `GITHUB_TOKEN` — a GitHub personal access token with write access to
+  this repo (Settings → Developer settings → Personal access tokens on
+  GitHub → generate one scoped to just this repository, contents:
+  read/write). This is what lets the Functions commit changes on his
+  behalf.
+
+Until both secrets are set, `admin.html` will unlock (or reject) based
+on `ADMIN_PASSWORD`, but any create/delete will fail with a clear error
+if `GITHUB_TOKEN` is missing or lacks permission.
+
+**Cleanup:** the two now-unused `EBAY_APP_ID` / `EBAY_CERT_ID` GitHub
+repository secrets from the abandoned eBay attempt can be deleted
+(GitHub → repo → Settings → Secrets and variables → Actions) — they're
+not doing anything anymore.
+
+**Security note:** `admin.html` is reachable by anyone who knows its
+URL, but nothing on it works without the correct password (checked
+server-side on every request) — this is a lightweight, appropriate
+level of protection for a small personal site, not enterprise-grade
+auth. Treat the admin password and the GitHub token as real secrets.
 
 ## Shared navbar/footer
 
