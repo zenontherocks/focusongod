@@ -67,36 +67,40 @@ amount in each of the three payment links.
 The popup closes via its X button, clicking outside it, or the Escape
 key, and returns focus to the button that opened it.
 
-## Jewelry/Other for Sale (currently a link-out; auto-sync is paused)
+## Jewelry/Other for Sale (auto-synced from eBay via the Browse API)
 
-`jewelry.html` right now just points visitors to the
-[eBay store](https://www.ebay.com/usr/northst9155) directly with a
-plain link — no listing data is pulled into the site.
+`jewelry.html` shows whatever is currently listed on the
+[eBay store](https://www.ebay.com/usr/northst9155) — no manual editing
+needed. An earlier version of this tried scraping eBay's RSS feed
+directly and got blocked by eBay's bot-protection (HTTP 403 — confirmed
+via the Action's logs, not fixable by adjusting headers). It's now
+rebuilt on eBay's official **Browse API**, authenticated with real
+Developer Program credentials:
 
-An automated sync was built but is **paused** because eBay's
-bot-protection blocks the approach it used (scraping the RSS export of
-the seller's search results returns an HTTP 403 block page — confirmed,
-not a guess — and isn't fixable by adjusting request headers). The
-pieces are still in the repo, unused, ready to be revived once the
-seller signs up for eBay's official Developer API instead of scraping:
-
-- `.github/workflows/update-ebay-listings.yml` — a GitHub Action
-  (schedule currently commented out; `workflow_dispatch` still works for
-  manual testing) meant to keep `data/ebay-listings.json` up to date
-- `.github/scripts/update_ebay_listings.py` — fetches and parses
-  eBay's RSS feed — **this is the part that needs replacing** with a
-  real eBay Browse API call once API credentials exist
+- `.github/workflows/update-ebay-listings.yml` — a GitHub Action that
+  runs the script below. Schedule is **paused** (commented out) until a
+  manual run has been verified to work end-to-end; `workflow_dispatch`
+  is enabled for that manual test. Once verified, uncomment the
+  `schedule:` block to run automatically (every 6 hours by default).
+- `.github/scripts/update_ebay_listings.py` — logs in to eBay's API
+  using the OAuth Client Credentials flow, searches for the seller's
+  active items (`filter=sellers:{northst9155}` on the Browse API's
+  `item_summary/search` endpoint, paginated), and writes
+  `data/ebay-listings.json`. Requires two **repository secrets**:
+  `EBAY_APP_ID` and `EBAY_CERT_ID` (the seller's Production App ID /
+  Cert ID from developer.ebay.com — already added as of this writing).
+  A failure (bad credentials, API error) fails the Action run loudly; a
+  successful call that finds zero items logs a warning and leaves the
+  existing data file untouched, rather than blanking the page.
 - `js/ebay-listings.js` — renders `data/ebay-listings.json` into a grid
-  of cards (image, title, price, "View on eBay" button) — not currently
-  linked from `jewelry.html`, but ready to reuse once there's real data
-  flowing into that JSON file again
+  of cards (image, title, price, "View on eBay" button), with a
+  fallback message linking to the eBay store directly if the data isn't
+  available for any reason.
 
-To pick this back up: get eBay Developer Program credentials (App ID +
-Cert ID) for the seller account, rework
-`update_ebay_listings.py` to call eBay's Browse API with those
-credentials instead of scraping RSS, re-enable the `schedule:` block in
-the workflow file, and swap `jewelry.html`'s content back to the
-`#ebay-listings-grid` + `js/ebay-listings.js` version.
+If the Action's commit changes `data/ebay-listings.json`, the site
+redeploys automatically (Cloudflare Pages watches `main`) with the new
+listings — nobody needs to touch any code when the seller adds,
+removes, or reprices something on eBay.
 
 ## Shared navbar/footer
 

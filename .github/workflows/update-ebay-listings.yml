@@ -1,10 +1,11 @@
 name: Update eBay listings
 
 on:
-  # Scheduled trigger is paused: the RSS-scraping approach this script used
-  # gets blocked by eBay's bot-protection (see git history / README for
-  # details). Re-enable the schedule below once the script is reworked to
-  # use the official eBay API instead.
+  # Scheduled trigger is paused until a manual workflow_dispatch run has
+  # been verified to work end-to-end against the real eBay Browse API
+  # (this script was just switched over from an RSS-scrape that eBay's
+  # bot-protection blocked). Re-enable the schedule below once a manual
+  # run succeeds.
   # schedule:
   #   - cron: "0 */6 * * *"
   workflow_dispatch: {}
@@ -27,6 +28,9 @@ jobs:
           python-version: "3.x"
 
       - name: Fetch current eBay listings
+        env:
+          EBAY_APP_ID: ${{ secrets.EBAY_APP_ID }}
+          EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID }}
         run: python3 .github/scripts/update_ebay_listings.py
 
       - name: Commit updated listings if changed

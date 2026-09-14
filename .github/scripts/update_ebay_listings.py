@@ -1,89 +1,153 @@
 #!/usr/bin/env python3
 """Fetch northst9155's current eBay listings and write data/ebay-listings.json.
 
+Uses eBay's official Browse API (not scraping — that got blocked by eBay's
+bot-protection, see git history) via the OAuth Client Credentials flow.
+Requires EBAY_APP_ID and EBAY_CERT_ID (Production keys) as environment
+variables, set from GitHub Actions repository secrets.
+
 Uses only the Python standard library (no pip dependencies) since this
 project has no other build tooling. Run by
-.github/workflows/update-ebay-listings.yml on a schedule.
+.github/workflows/update-ebay-listings.yml on demand / on a schedule.
 """
 
+import base64
 import json
-import re
+import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
-RSS_URL = "https://www.ebay.com/sch/i.html?_ssn=northst9155&_rss=1"
+SELLER_USERNAME = "northst9155"
+MARKETPLACE_ID = "EBAY_US"
+TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
+SEARCH_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
 OUTPUT_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ebay-listings.json"
 
-PRICE_RE = re.compile(r"(?:US\s*)?\$[\d,]+\.\d{2}")
-IMG_SRC_RE = re.compile(r'<img[^>]+src="([^"]+)"', re.IGNORECASE)
-
-REQUEST_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/rss+xml, application/xml, text/xml, */*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://www.ebay.com/",
-}
+PAGE_LIMIT = 100
 
 
-def fetch_feed(url):
-    request = urllib.request.Request(url, headers=REQUEST_HEADERS)
+def http_request(request):
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            if response.status != 200:
-                raise RuntimeError(f"Unexpected status {response.status} fetching {url}")
-            return response.read()
+        return urllib.request.urlopen(request, timeout=30)
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")[:1000]
+        body = exc.read().decode("utf-8", errors="replace")[:2000]
         raise RuntimeError(
-            f"HTTP {exc.code} {exc.reason} fetching {url}\nResponse body (truncated): {body}"
+            f"HTTP {exc.code} {exc.reason} calling {request.full_url}\n"
+            f"Response body (truncated): {body}"
         ) from exc
 
 
-def parse_items(rss_bytes):
-    root = ET.fromstring(rss_bytes)
+def get_access_token(app_id, cert_id):
+    credentials = f"{app_id}:{cert_id}".encode("utf-8")
+    basic_auth = base64.b64encode(credentials).decode("ascii")
+    body = urllib.parse.urlencode(
+        {
+            "grant_type": "client_credentials",
+            "scope": "https://api.ebay.com/oauth/api_scope",
+        }
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        TOKEN_URL,
+        data=body,
+        headers={
+            "Authorization": f"Basic {basic_auth}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method="POST",
+    )
+    with http_request(request) as response:
+        payload = json.loads(response.read())
+    return payload["access_token"]
+
+
+def search_seller_items(access_token, offset):
+    params = {
+        "filter": f"sellers:{{{SELLER_USERNAME}}}",
+        "limit": str(PAGE_LIMIT),
+        "offset": str(offset),
+    }
+    url = f"{SEARCH_URL}?{urllib.parse.urlencode(params)}"
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "X-EBAY-C-MARKETPLACE-ID": MARKETPLACE_ID,
+            "Accept": "application/json",
+        },
+    )
+    with http_request(request) as response:
+        return json.loads(response.read())
+
+
+def extract_item(raw):
+    price_info = raw.get("price") or {}
+    value = price_info.get("value")
+    currency = price_info.get("currency", "")
+    price = None
+    if value:
+        price = f"${value}" if currency == "USD" else f"{value} {currency}"
+
+    image = (raw.get("image") or {}).get("imageUrl")
+    if not image:
+        thumbnails = raw.get("thumbnailImages") or []
+        if thumbnails:
+            image = thumbnails[0].get("imageUrl")
+
+    return {
+        "title": (raw.get("title") or "").strip(),
+        "price": price,
+        "url": raw.get("itemWebUrl"),
+        "image": image,
+    }
+
+
+def fetch_all_items(access_token):
     items = []
-    for item_el in root.findall("./channel/item"):
-        title = (item_el.findtext("title") or "").strip()
-        link = (item_el.findtext("link") or "").strip()
-        description = item_el.findtext("description") or ""
+    offset = 0
+    while True:
+        data = search_seller_items(access_token, offset)
+        batch = data.get("itemSummaries") or []
+        items.extend(extract_item(raw) for raw in batch)
 
-        price_match = PRICE_RE.search(description)
-        price = price_match.group(0) if price_match else None
+        total = data.get("total", len(items))
+        offset += len(batch)
+        if not batch or len(batch) < PAGE_LIMIT or offset >= total:
+            break
 
-        img_match = IMG_SRC_RE.search(description)
-        image = img_match.group(1) if img_match else None
-
-        if not title or not link:
-            continue
-
-        items.append({"title": title, "price": price, "url": link, "image": image})
-    return items
+    return [item for item in items if item["title"] and item["url"]]
 
 
 def main():
-    try:
-        rss_bytes = fetch_feed(RSS_URL)
-    except Exception as exc:  # network/HTTP failure -> fail the job loudly
-        print(f"ERROR: failed to fetch eBay RSS feed: {exc}", file=sys.stderr)
+    app_id = os.environ.get("EBAY_APP_ID")
+    cert_id = os.environ.get("EBAY_CERT_ID")
+    if not app_id or not cert_id:
+        print(
+            "ERROR: EBAY_APP_ID and/or EBAY_CERT_ID environment variables are not set.",
+            file=sys.stderr,
+        )
         return 1
 
     try:
-        items = parse_items(rss_bytes)
-    except ET.ParseError as exc:
-        print(f"ERROR: failed to parse eBay RSS feed as XML: {exc}", file=sys.stderr)
+        access_token = get_access_token(app_id, cert_id)
+    except Exception as exc:
+        print(f"ERROR: failed to get an eBay access token: {exc}", file=sys.stderr)
+        return 1
+
+    try:
+        items = fetch_all_items(access_token)
+    except Exception as exc:
+        print(f"ERROR: failed to search eBay listings: {exc}", file=sys.stderr)
         return 1
 
     if not items:
         print(
-            "WARNING: parsed 0 items from the eBay feed (format may have changed, "
-            "or the store may be temporarily empty). Leaving existing data file untouched.",
+            "WARNING: eBay search returned 0 items (the store may be temporarily "
+            "empty, or the seller filter may need adjusting). Leaving existing "
+            "data file untouched.",
             file=sys.stderr,
         )
         return 0
