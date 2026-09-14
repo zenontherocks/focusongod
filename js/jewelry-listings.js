@@ -1,6 +1,6 @@
 // Renders the jewelry/other-for-sale page's listings grid from
 // data/jewelry-listings.json, which the admin console (admin.html,
-// js/admin.js, functions/api/jewelry-*.js) keeps updated.
+// js/admin.js, src/routes/jewelry-*.js) keeps updated.
 
 (function () {
   function escapeHtml(value) {

@@ -1,7 +1,7 @@
 // Jewelry admin console: password gate, resize/upload a new listing photo,
-// and list/delete existing listings. Talks to the Cloudflare Pages
-// Functions under functions/api/jewelry-*.js, which commit changes
-// straight to the site's GitHub repo.
+// and list/delete existing listings. Talks to the Cloudflare Worker routes
+// under src/routes/jewelry-*.js, which commit changes straight to the
+// site's GitHub repo.
 
 (function () {
   var PASSWORD_KEY = "fog_admin_password";
