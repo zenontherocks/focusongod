@@ -67,6 +67,14 @@
         }
         if (!response.ok) {
           var detail = data.error || (text ? text.slice(0, 300) : "");
+          if (data.debug) {
+            detail +=
+              " (sent " +
+              data.debug.providedLength +
+              " characters, expected " +
+              data.debug.expectedLength +
+              ")";
+          }
           throw new Error("HTTP " + response.status + (detail ? ": " + detail : ""));
         }
         return data;
@@ -164,12 +172,7 @@
           unlock();
         })
         .catch(function (err) {
-          var message = String(err.message || "");
-          if (message.indexOf("Unauthorized") !== -1) {
-            loginStatus.textContent = "Wrong password.";
-          } else {
-            loginStatus.textContent = "Error: " + message;
-          }
+          loginStatus.textContent = String(err.message || "Something went wrong.");
           setStoredPassword("");
         });
     });
