@@ -122,14 +122,22 @@ def fetch_all_items(access_token):
 
 
 def main():
-    app_id = os.environ.get("EBAY_APP_ID")
-    cert_id = os.environ.get("EBAY_CERT_ID")
+    app_id = (os.environ.get("EBAY_APP_ID") or "").strip()
+    cert_id = (os.environ.get("EBAY_CERT_ID") or "").strip()
     if not app_id or not cert_id:
         print(
             "ERROR: EBAY_APP_ID and/or EBAY_CERT_ID environment variables are not set.",
             file=sys.stderr,
         )
         return 1
+
+    if "-SBX-" in app_id:
+        print(
+            "WARNING: EBAY_APP_ID looks like a Sandbox key (contains '-SBX-'), "
+            "but this script calls the Production API (api.ebay.com). Use the "
+            "Production App ID/Cert ID from developer.ebay.com instead.",
+            file=sys.stderr,
+        )
 
     try:
         access_token = get_access_token(app_id, cert_id)
