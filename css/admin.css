@@ -123,3 +123,39 @@
 .admin-empty {
   color: var(--color-text-light);
 }
+
+.admin-message {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-border);
+  align-items: flex-start;
+}
+
+.admin-message:last-child {
+  border-bottom: none;
+}
+
+.admin-message__body {
+  flex-grow: 1;
+}
+
+.admin-message__meta {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.admin-message__body p:last-child {
+  margin-bottom: 0;
+}
+
+#moderation-topic-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  min-height: 44px;
+}

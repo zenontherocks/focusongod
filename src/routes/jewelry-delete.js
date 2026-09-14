@@ -11,10 +11,8 @@ import {
   githubGetFile,
   githubPutFile,
   githubDeleteFile,
-  checkAuth,
-  unauthorized,
-  jsonResponse,
 } from "../lib/github.js";
+import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
 
 export async function handleDelete(request, env) {
   if (!checkAuth(request, env)) return unauthorized();

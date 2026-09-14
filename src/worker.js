@@ -9,6 +9,12 @@
 import { handleAuthCheck } from "./routes/jewelry-auth-check.js";
 import { handleCreate } from "./routes/jewelry-create.js";
 import { handleDelete } from "./routes/jewelry-delete.js";
+import { handleTopicsList } from "./routes/discussion-topics.js";
+import { handleMessagesList } from "./routes/discussion-messages.js";
+import { handleMessageCreate } from "./routes/discussion-message-create.js";
+import { handleTopicCreate } from "./routes/discussion-topic-create.js";
+import { handleTopicDelete } from "./routes/discussion-topic-delete.js";
+import { handleMessageDelete } from "./routes/discussion-message-delete.js";
 
 export default {
   async fetch(request, env) {
@@ -22,6 +28,25 @@ export default {
     }
     if (request.method === "POST" && url.pathname === "/api/jewelry-delete") {
       return handleDelete(request, env);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/discussion-topics") {
+      return handleTopicsList(request, env);
+    }
+    if (request.method === "GET" && url.pathname === "/api/discussion-messages") {
+      return handleMessagesList(request, env);
+    }
+    if (request.method === "POST" && url.pathname === "/api/discussion-message-create") {
+      return handleMessageCreate(request, env);
+    }
+    if (request.method === "POST" && url.pathname === "/api/discussion-topic-create") {
+      return handleTopicCreate(request, env);
+    }
+    if (request.method === "POST" && url.pathname === "/api/discussion-topic-delete") {
+      return handleTopicDelete(request, env);
+    }
+    if (request.method === "POST" && url.pathname === "/api/discussion-message-delete") {
+      return handleMessageDelete(request, env);
     }
 
     // Not one of our API routes — fall back to static asset serving

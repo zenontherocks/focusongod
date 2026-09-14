@@ -13,10 +13,8 @@ import {
   fromBase64,
   githubGetFile,
   githubPutFile,
-  checkAuth,
-  unauthorized,
-  jsonResponse,
 } from "../lib/github.js";
+import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
 
 export async function handleCreate(request, env) {
   if (!checkAuth(request, env)) return unauthorized();
