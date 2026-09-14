@@ -77,8 +77,9 @@ export async function githubDeleteFile(env, path, message, sha) {
 }
 
 export function checkAuth(request, env) {
-  const provided = request.headers.get("X-Admin-Password") || "";
-  return Boolean(env.ADMIN_PASSWORD) && provided === env.ADMIN_PASSWORD;
+  const provided = (request.headers.get("X-Admin-Password") || "").trim();
+  const expected = (env.ADMIN_PASSWORD || "").trim();
+  return Boolean(expected) && provided === expected;
 }
 
 export function jsonResponse(data, status) {

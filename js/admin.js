@@ -57,9 +57,17 @@
       },
       body: JSON.stringify(body),
     }).then(function (response) {
-      return response.json().then(function (data) {
+      return response.text().then(function (text) {
+        var data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          // Non-JSON response (e.g. a plain 404/500 page) — fall through
+          // with an empty data object so we still surface the real status.
+        }
         if (!response.ok) {
-          throw new Error(data.error || "Request failed (" + response.status + ")");
+          var detail = data.error || (text ? text.slice(0, 300) : "");
+          throw new Error("HTTP " + response.status + (detail ? ": " + detail : ""));
         }
         return data;
       });
@@ -147,7 +155,7 @@
 
     loginForm.addEventListener("submit", function (event) {
       event.preventDefault();
-      var value = document.getElementById("admin-password").value;
+      var value = document.getElementById("admin-password").value.trim();
       setStoredPassword(value);
       loginStatus.textContent = "Checking...";
       apiRequest("/api/jewelry-auth-check", {})
@@ -156,7 +164,12 @@
           unlock();
         })
         .catch(function (err) {
-          loginStatus.textContent = "Wrong password.";
+          var message = String(err.message || "");
+          if (message.indexOf("Unauthorized") !== -1) {
+            loginStatus.textContent = "Wrong password.";
+          } else {
+            loginStatus.textContent = "Error: " + message;
+          }
           setStoredPassword("");
         });
     });
