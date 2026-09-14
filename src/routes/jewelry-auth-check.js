@@ -7,7 +7,7 @@
 // (extra/missing characters) apart from a genuine typo, without exposing
 // the password itself.
 
-import { jsonResponse } from "../lib/github.js";
+import { jsonResponse } from "../lib/http.js";
 
 export async function handleAuthCheck(request, env) {
   const provided = (request.headers.get("X-Admin-Password") || "").trim();

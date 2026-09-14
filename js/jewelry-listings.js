@@ -5,15 +5,8 @@
 // js/checkout-modal.js) via data-item-* attributes.
 
 (function () {
-  function escapeHtml(value) {
-    var div = document.createElement("div");
-    div.textContent = value == null ? "" : value;
-    return div.innerHTML;
-  }
-
-  function escapeAttr(value) {
-    return escapeHtml(value).replace(/"/g, "&quot;");
-  }
+  var escapeHtml = window.FogDomUtils.escapeHtml;
+  var escapeAttr = window.FogDomUtils.escapeAttr;
 
   function formatPrice(value) {
     var num = Number(value);

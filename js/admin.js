@@ -4,6 +4,8 @@
 // site's GitHub repo.
 
 (function () {
+  var escapeHtml = window.FogDomUtils.escapeHtml;
+  var escapeAttr = window.FogDomUtils.escapeAttr;
   var PASSWORD_KEY = "fog_admin_password";
   var MAX_DIMENSION = 1200;
   var JPEG_QUALITY = 0.82;
@@ -82,15 +84,31 @@
     });
   }
 
+  function fetchJson(path) {
+    return fetch(path).then(function (response) {
+      return response.text().then(function (text) {
+        var data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          // Non-JSON response — fall through with an empty object.
+        }
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status + (data.error ? ": " + data.error : ""));
+        }
+        return data;
+      });
+    });
+  }
+
   function formatPrice(value) {
     var num = Number(value);
     return isNaN(num) ? "" : "$" + num.toFixed(2);
   }
 
-  function escapeHtml(value) {
-    var div = document.createElement("div");
-    div.textContent = value == null ? "" : value;
-    return div.innerHTML;
+  function formatDate(isoString) {
+    var date = new Date(isoString);
+    return isNaN(date.getTime()) ? "" : date.toLocaleString();
   }
 
   function renderListings(items) {
@@ -105,14 +123,14 @@
           ? ' style="background-image: url(\'' + escapeHtml(item.image) + "')\""
           : "";
         return (
-          '<div class="admin-listing" data-id="' + escapeHtml(item.id) + '">' +
+          '<div class="admin-listing" data-id="' + escapeAttr(item.id) + '">' +
           '<div class="admin-listing__image"' + imageStyle + "></div>" +
           '<div class="admin-listing__body">' +
           "<h3>" + escapeHtml(item.title) + "</h3>" +
           '<p class="admin-listing__price">' + formatPrice(item.price) + "</p>" +
           (item.description ? "<p>" + escapeHtml(item.description) + "</p>" : "") +
           '<button type="button" class="admin-listing__delete" data-id="' +
-          escapeHtml(item.id) +
+          escapeAttr(item.id) +
           '">Delete</button>' +
           "</div>" +
           "</div>"
@@ -138,6 +156,108 @@
       });
   }
 
+  function renderTopics(topics) {
+    var container = document.getElementById("admin-topics");
+    if (!topics.length) {
+      container.innerHTML = '<p class="admin-empty">No discussion topics yet.</p>';
+      return;
+    }
+    container.innerHTML = topics
+      .map(function (topic) {
+        return (
+          '<div class="admin-listing" data-id="' + escapeAttr(topic.id) + '">' +
+          '<div class="admin-listing__body">' +
+          "<h3>" + escapeHtml(topic.title) + "</h3>" +
+          (topic.description ? "<p>" + escapeHtml(topic.description) + "</p>" : "") +
+          '<button type="button" class="admin-listing__delete admin-topic__delete" data-id="' +
+          escapeAttr(topic.id) +
+          '">Delete</button>' +
+          "</div>" +
+          "</div>"
+        );
+      })
+      .join("");
+  }
+
+  function populateModerationSelect(topics) {
+    var select = document.getElementById("moderation-topic-select");
+    var currentValue = select.value;
+    var options = ['<option value="">Select a topic…</option>'].concat(
+      topics.map(function (topic) {
+        return '<option value="' + escapeAttr(topic.id) + '">' + escapeHtml(topic.title) + "</option>";
+      })
+    );
+    select.innerHTML = options.join("");
+    if (topics.some(function (t) { return t.id === currentValue; })) {
+      select.value = currentValue;
+    }
+  }
+
+  function loadTopics() {
+    var statusEl = document.getElementById("topics-status");
+    statusEl.textContent = "Loading...";
+    return fetchJson("/api/discussion-topics")
+      .then(function (data) {
+        statusEl.textContent = "";
+        var topics = (data && data.topics) || [];
+        renderTopics(topics);
+        populateModerationSelect(topics);
+        return topics;
+      })
+      .catch(function (err) {
+        statusEl.textContent = err.message;
+      });
+  }
+
+  function renderMessages(messages) {
+    var container = document.getElementById("admin-messages");
+    if (!messages.length) {
+      container.innerHTML = '<p class="admin-empty">No messages in this topic yet.</p>';
+      return;
+    }
+    container.innerHTML = messages
+      .map(function (message) {
+        return (
+          '<div class="admin-message" data-id="' + escapeAttr(message.id) + '">' +
+          '<div class="admin-message__body">' +
+          '<p class="admin-message__meta">' +
+          "<strong>" + escapeHtml(message.author_name) + "</strong> — " +
+          formatDate(message.created_at) +
+          "</p>" +
+          "<p>" + escapeHtml(message.body) + "</p>" +
+          "</div>" +
+          '<button type="button" class="admin-listing__delete admin-message__delete" data-id="' +
+          escapeAttr(message.id) +
+          '">Delete</button>' +
+          "</div>"
+        );
+      })
+      .join("");
+  }
+
+  function loadMessagesForSelectedTopic() {
+    var select = document.getElementById("moderation-topic-select");
+    var statusEl = document.getElementById("messages-status");
+    var container = document.getElementById("admin-messages");
+    var topicId = select.value;
+
+    if (!topicId) {
+      statusEl.textContent = "";
+      container.innerHTML = "";
+      return;
+    }
+
+    statusEl.textContent = "Loading...";
+    fetchJson("/api/discussion-messages?topic=" + encodeURIComponent(topicId) + "&_=" + Date.now())
+      .then(function (data) {
+        statusEl.textContent = "";
+        renderMessages((data && data.messages) || []);
+      })
+      .catch(function (err) {
+        statusEl.textContent = err.message;
+      });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     var lockSection = document.getElementById("admin-lock");
     var contentSection = document.getElementById("admin-content");
@@ -150,6 +270,7 @@
       lockSection.hidden = true;
       contentSection.hidden = false;
       loadListings();
+      loadTopics();
     }
 
     function tryStoredPassword() {
@@ -221,6 +342,67 @@
       apiRequest("/api/jewelry-delete", { id: id })
         .then(function () {
           loadListings();
+        })
+        .catch(function (err) {
+          window.alert("Error: " + err.message);
+          button.disabled = false;
+          button.textContent = "Delete";
+        });
+    });
+
+    var topicForm = document.getElementById("topic-form");
+    var topicFormStatus = document.getElementById("topic-form-status");
+
+    topicForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var title = document.getElementById("topic-title").value.trim();
+      var description = document.getElementById("topic-description").value.trim();
+
+      topicFormStatus.textContent = "Adding...";
+      apiRequest("/api/discussion-topic-create", { title: title, description: description })
+        .then(function () {
+          topicFormStatus.textContent = "Added!";
+          topicForm.reset();
+          loadTopics();
+        })
+        .catch(function (err) {
+          topicFormStatus.textContent = "Error: " + err.message;
+        });
+    });
+
+    document.getElementById("admin-topics").addEventListener("click", function (event) {
+      var button = event.target.closest(".admin-topic__delete");
+      if (!button) return;
+      var id = button.getAttribute("data-id");
+      if (!window.confirm("Delete this topic and all its messages?")) return;
+      button.disabled = true;
+      button.textContent = "Deleting...";
+      apiRequest("/api/discussion-topic-delete", { id: id })
+        .then(function () {
+          loadTopics();
+          loadMessagesForSelectedTopic();
+        })
+        .catch(function (err) {
+          window.alert("Error: " + err.message);
+          button.disabled = false;
+          button.textContent = "Delete";
+        });
+    });
+
+    document
+      .getElementById("moderation-topic-select")
+      .addEventListener("change", loadMessagesForSelectedTopic);
+
+    document.getElementById("admin-messages").addEventListener("click", function (event) {
+      var button = event.target.closest(".admin-message__delete");
+      if (!button) return;
+      var id = button.getAttribute("data-id");
+      if (!window.confirm("Delete this message?")) return;
+      button.disabled = true;
+      button.textContent = "Deleting...";
+      apiRequest("/api/discussion-message-delete", { id: id })
+        .then(function () {
+          loadMessagesForSelectedTopic();
         })
         .catch(function (err) {
           window.alert("Error: " + err.message);

@@ -1,10 +1,11 @@
 // Shared helpers for committing jewelry listing changes straight to the
 // site's GitHub repo via the Contents API. Used by the admin console's
-// Cloudflare Pages Functions (functions/api/jewelry-*.js).
+// Cloudflare Worker routes (src/routes/jewelry-*.js).
 //
-// Requires two Cloudflare Pages environment secrets (set in the Cloudflare
-// dashboard, not in this repo): GITHUB_TOKEN (a token with contents:write on
-// this repo) and ADMIN_PASSWORD (the shared password gating these endpoints).
+// Requires two Cloudflare Worker secrets (set in the Cloudflare dashboard's
+// runtime "Variables and Secrets" section, not in this repo): GITHUB_TOKEN
+// (a token with contents:write on this repo) and ADMIN_PASSWORD (the shared
+// password gating these endpoints — see src/lib/http.js's checkAuth).
 
 export const OWNER = "zenontherocks";
 export const REPO = "focusongod";
@@ -74,21 +75,4 @@ export async function githubDeleteFile(env, path, message, sha) {
     throw new Error(`GitHub DELETE ${path} failed: ${res.status} ${await res.text()}`);
   }
   return res.json();
-}
-
-export function checkAuth(request, env) {
-  const provided = (request.headers.get("X-Admin-Password") || "").trim();
-  const expected = (env.ADMIN_PASSWORD || "").trim();
-  return Boolean(expected) && provided === expected;
-}
-
-export function jsonResponse(data, status) {
-  return new Response(JSON.stringify(data), {
-    status: status || 200,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-export function unauthorized() {
-  return jsonResponse({ error: "Unauthorized" }, 401);
 }

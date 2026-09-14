@@ -9,8 +9,11 @@ in a browser to preview, or upload the whole folder to any static host
 - `index.html` — the book sale section (fully built) — this is the site's landing page
 - `jewelry.html` — "Jewelry/Other for Sale" (fully built) — listings managed via `admin.html`, see below
 - `dog-treats.html` — "Mack's Snacks" (fully built) — same hero/detail/checkout pattern as the book page, see below
-- `admin.html` — password-protected console for adding/removing jewelry listings, see below
-- `discussion.html` — placeholder "coming soon" page for a future section
+- `admin.html` — password-protected console for adding/removing jewelry
+  listings and discussion topics/messages, see below
+- `discussion.html` — "Discussion" (fully built) — topics curated via
+  `admin.html`, one flat message feed per topic, no login required to
+  post, see below
 
 ## Editing text
 
@@ -154,6 +157,61 @@ URL, but nothing on it works without the correct password (checked
 server-side on every request) — this is a lightweight, appropriate
 level of protection for a small personal site, not enterprise-grade
 auth. Treat the admin password and the GitHub token as real secrets.
+
+## Discussion page
+
+`discussion.html` is a simple, login-free chat: your friend curates a
+small set of topics through `admin.html` (same pattern as jewelry
+listings), and within each topic anyone can post after typing a display
+name — that name is pure self-identification, not an account, so
+nothing stops someone from typing any name. There's no nested
+threading; each topic is just one flowing feed of messages in order.
+
+**How it works:**
+
+- `discussion.html` + `js/discussion.js` — loads the topic list, shows
+  the selected topic's messages, and re-checks for new ones every ~8
+  seconds while the page is open (a simple periodic refresh, not a true
+  live connection — good enough for this without adding the complexity
+  of websockets). The display name is remembered in the browser
+  (`localStorage`) so visitors don't retype it every visit.
+- `admin.html` gets two more sections: **Add a discussion topic**
+  (title + optional description) and its list with Delete buttons, plus
+  **Moderate discussion messages** (pick a topic, see its messages,
+  delete any of them). Same password-gated pattern as jewelry listings.
+- Unlike jewelry listings (which live in a JSON file committed to
+  GitHub), topics and messages live in **Cloudflare D1** — a real SQL
+  database bound directly to the Worker (`src/routes/discussion-*.js`,
+  query helpers in `src/lib/db.js`, schema in `db/schema.sql`). A public
+  chat can't use the GitHub-commit trick jewelry listings use: writes
+  need to be instant, and only the password-gated admin should ever be
+  committing to the repo's git history. Posting is public (no password),
+  but every post is capped in length server-side, checked against a
+  hidden honeypot field (a bot filling it in gets silently ignored), and
+  throttled to one post per 5 seconds per visitor.
+
+**One-time setup required** (do this once, whenever you're ready to
+turn the Discussion page on):
+
+1. In the Cloudflare dashboard, go to your Worker → **D1** (or
+   Storage & Databases → D1) → **Create database**. Name it whatever
+   you like, e.g. `focusongod-discussion`.
+2. Open the new database and use its built-in **Console** tab to run
+   the contents of `db/schema.sql` from this repo once, pasted directly
+   into the query box. This creates the `topics` and `messages` tables.
+3. Still on the database's page, find its **Database ID** (a long
+   UUID-looking string) and send it over — it's not sensitive, just an
+   identifier, safe to put in the repo. Once given, `wrangler.jsonc`
+   gets a `d1_databases` entry binding it as `env.DB`, which is what
+   `src/routes/discussion-*.js` actually reads/writes from at runtime.
+4. Same as the jewelry admin console, this reuses the existing
+   `ADMIN_PASSWORD` secret already set up in the Worker's **Variables
+   and Secrets** — no new secret needed for Discussion specifically.
+
+Until step 3 is done (the binding is actually wired into
+`wrangler.jsonc`), the Discussion page will load but show a "couldn't
+load topics" message, since `env.DB` won't exist yet — same graceful-
+failure style as the jewelry admin console before its secrets were set.
 
 ## Shared navbar/footer
 

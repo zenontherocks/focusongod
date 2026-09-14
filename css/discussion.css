@@ -1,0 +1,137 @@
+/* ============================================
+   Discussion page — topic tabs, message feed, and post form.
+   Linked only from discussion.html.
+   ============================================ */
+
+.discussion-page {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.discussion-page h1 {
+  margin-bottom: 8px;
+}
+
+.discussion-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.discussion-topics__button {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text);
+  min-height: 44px;
+}
+
+.discussion-topics__button:hover {
+  border-color: var(--color-accent);
+}
+
+.discussion-topics__button--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.discussion-topic__description {
+  color: var(--color-text-light);
+  margin-top: -4px;
+}
+
+.discussion-messages {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 16px 20px;
+  margin: 20px 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.discussion-message {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.discussion-message:last-child {
+  border-bottom: none;
+}
+
+.discussion-message__meta {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.discussion-message__body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.discussion-loading,
+.discussion-empty {
+  color: var(--color-text-light);
+}
+
+.discussion-post-form {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 600px;
+}
+
+.discussion-post-form__row {
+  margin-bottom: 16px;
+}
+
+.discussion-post-form__row label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.discussion-post-form__row input,
+.discussion-post-form__row textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.discussion-post-form__row textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.discussion-post-form__status {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  min-height: 1.2em;
+}
+
+/* Honeypot field: invisible and unreachable by keyboard/AT for real
+   visitors, but a plain <input> a simple bot will still find and fill
+   in. Deliberately not display:none — some bots skip those. */
+.discussion-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
