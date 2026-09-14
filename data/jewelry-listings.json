@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-14T22:17:07.135Z",
+  "generated_at": "2026-09-14T22:38:19.465Z",
   "items": [
     {
       "id": "mu1szd66b1ra8y",
@@ -8,22 +8,6 @@
       "price": 125,
       "image": "images/jewelry/mu1szd66b1ra8y.jpg",
       "created_at": "2026-09-14T22:17:07.135Z"
-    },
-    {
-      "id": "mu1sx532rx1cj5",
-      "title": "Vintage Sancrest bracelet",
-      "description": "Beautiful antique vintage Sancrest bracelet.",
-      "price": 125,
-      "image": "images/jewelry/mu1sx532rx1cj5.jpg",
-      "created_at": "2026-09-14T22:15:23.169Z"
-    },
-    {
-      "id": "mu1sx3boqchxid",
-      "title": "Vintage Sancrest bracelet",
-      "description": "Beautiful antique vintage Sancrest bracelet.",
-      "price": 125,
-      "image": "images/jewelry/mu1sx3boqchxid.jpg",
-      "created_at": "2026-09-14T22:15:21.252Z"
     }
   ]
 }
