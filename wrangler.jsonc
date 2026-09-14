@@ -5,5 +5,12 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "focusongod-discussion",
+      "database_id": "88b15568-c65b-43f2-a6c1-cb9d074c026a"
+    }
+  ]
 }
