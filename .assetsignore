@@ -1,0 +1,10 @@
+# Files that shouldn't be uploaded as public static assets, even though
+# they live in this repo (assets.directory is "." in wrangler.jsonc).
+.github
+.git
+.wrangler
+.assetsignore
+.gitignore
+README.md
+wrangler.jsonc
+src

@@ -1,0 +1,9 @@
+{
+  "name": "focusongod",
+  "compatibility_date": "2026-09-14",
+  "main": "src/worker.js",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  }
+}

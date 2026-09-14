@@ -87,29 +87,38 @@ removing listings — no third party involved at all.
   button on each. Photos are resized/compressed client-side (max 1200px
   on the long edge, JPEG) before upload, to keep things fast and the
   repo lean.
-- `functions/api/jewelry-create.js`, `functions/api/jewelry-delete.js`,
-  `functions/api/jewelry-auth-check.js` — Cloudflare Pages Functions
-  (serverless, run by Cloudflare, not a separate server to manage).
-  They check the password, then use the GitHub Contents API to commit
-  the new/removed image and the updated `data/jewelry-listings.json`
-  **directly to `main`** — which triggers a normal Cloudflare Pages
-  deploy, same as any other change to this site. That means a new or
-  deleted listing takes roughly **30-90 seconds** to actually appear
-  live (a real deploy happens) — that's expected, not a bug.
+- This site actually deploys as a **Cloudflare Worker with static
+  assets** (not classic "Pages" — that distinction matters for how the
+  backend is wired up). `wrangler.jsonc` at the repo root configures
+  it: `assets.directory` serves every file in this repo (minus the
+  handful listed in `.assetsignore`, like `src/` and this README) as
+  the static site, and `main` points at `src/worker.js`, a small Worker
+  script that only runs for requests that *don't* match a static file
+  — i.e. just our three API routes below; every normal page/image/CSS
+  request is served directly without the Worker running at all.
+- `src/worker.js` routes `/api/jewelry-create`, `/api/jewelry-delete`,
+  and `/api/jewelry-auth-check` (each implemented in `src/routes/`,
+  shared GitHub-API helpers in `src/lib/github.js`) to the matching
+  handler. They check the password, then use the GitHub Contents API to
+  commit the new/removed image and the updated
+  `data/jewelry-listings.json` **directly to `main`** — which triggers
+  a normal deploy, same as any other change to this site. That means a
+  new or deleted listing takes roughly **30-90 seconds** to actually
+  appear live (a real deploy happens) — that's expected, not a bug.
 - `js/jewelry-listings.js` — renders `data/jewelry-listings.json` into
   the grid of cards on `jewelry.html` (image, title, price,
   description).
 
-**One-time setup required** (two secrets in the Cloudflare Pages
-dashboard — Workers & Pages → this project → Settings → Environment
-variables — **not** GitHub secrets, a different place):
+**One-time setup required** (two secrets in the Cloudflare dashboard —
+Workers & Pages → this project → Settings → Variables and secrets —
+**not** GitHub secrets, a different place):
 
 - `ADMIN_PASSWORD` — whatever password should unlock `admin.html`.
   Pick something only you and your friend know.
 - `GITHUB_TOKEN` — a GitHub personal access token with write access to
   this repo (Settings → Developer settings → Personal access tokens on
   GitHub → generate one scoped to just this repository, contents:
-  read/write). This is what lets the Functions commit changes on his
+  read/write). This is what lets the Worker commit changes on his
   behalf.
 
 Until both secrets are set, `admin.html` will unlock (or reject) based

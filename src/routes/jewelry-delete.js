@@ -14,10 +14,9 @@ import {
   checkAuth,
   unauthorized,
   jsonResponse,
-} from "../_lib/github.js";
+} from "../lib/github.js";
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export async function handleDelete(request, env) {
   if (!checkAuth(request, env)) return unauthorized();
 
   let payload;

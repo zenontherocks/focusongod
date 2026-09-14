@@ -4,7 +4,8 @@
 //
 // Commits the image to images/jewelry/<id>.<ext> and appends the new item to
 // data/jewelry-listings.json, both directly on the `main` branch — which
-// then auto-deploys via Cloudflare Pages, same as any other change to the site.
+// then auto-deploys via this Worker's git integration, same as any other
+// change to the site.
 
 import {
   DATA_PATH,
@@ -15,10 +16,9 @@ import {
   checkAuth,
   unauthorized,
   jsonResponse,
-} from "../_lib/github.js";
+} from "../lib/github.js";
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export async function handleCreate(request, env) {
   if (!checkAuth(request, env)) return unauthorized();
 
   let payload;
