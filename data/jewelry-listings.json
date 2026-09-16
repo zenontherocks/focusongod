@@ -1,13 +1,69 @@
 {
-  "generated_at": "2026-09-14T22:56:54.663Z",
+  "generated_at": "2026-09-15T20:48:23.925Z",
   "items": [
     {
-      "id": "mu1uej9o9m4z9r",
-      "title": "42",
-      "description": "🙌🏻",
-      "price": 1,
-      "image": "images/jewelry/mu1uej9o9m4z9r.jpg",
-      "created_at": "2026-09-14T22:56:54.663Z"
+      "id": "mu3594jehzcnkq",
+      "title": "Bomb Party “Spring Stacks,\" bracelet.",
+      "description": "“Spring Stacks\" collection, features synthetic lab-created gemstones set in a rose gold-plated, mesh/woven chain band. The original retail price for items in these collections is generally $122.00..",
+      "price": 44.95,
+      "image": "images/jewelry/mu3594jehzcnkq.jpg",
+      "created_at": "2026-09-15T20:48:23.925Z"
+    },
+    {
+      "id": "mu34hipxzosj2l",
+      "title": "Beaded stretch bracelet",
+      "description": "Beaded stretch bracelet featuring large, translucent, frosted quartz teardrop/oval beads, separated by smaller silver-toned round spacer beads.",
+      "price": 24.99,
+      "image": "images/jewelry/mu34hipxzosj2l.jpg",
+      "created_at": "2026-09-15T20:26:55.960Z"
+    },
+    {
+      "id": "mu337h38yvalvg",
+      "title": "Polished gemstone cabochons",
+      "description": "These are polished gemstone cabochons, stones that have been shaped and smoothed with a flat back and a domed front, primarily intended for jewelry making (such as wire-wrapping or setting in rings and pendants).\n\nYou can pick the stine you want, or several, or all of them. I have the price set for one, your choice. If you want to buy them all I will do a better price, you will have to tell me and I will adjust the price before the transaction.All prices include shipping.",
+      "price": 29,
+      "image": "images/jewelry/mu337h38yvalvg.jpg",
+      "created_at": "2026-09-15T19:51:07.512Z"
+    },
+    {
+      "id": "mu32nlsku2ztxk",
+      "title": "Lab created Zircon gemstones",
+      "description": "You can choose which gemstone you would like and choose either a gold or silver plated claw ring in which to set it in.",
+      "price": 29,
+      "image": "images/jewelry/mu32nlsku2ztxk.jpg",
+      "created_at": "2026-09-15T19:35:40.723Z"
+    },
+    {
+      "id": "mu326n9rr9s2pz",
+      "title": "Four faceted yellow citrine gemstones",
+      "description": "Four faceted yellow citrine loose gemstones. 6.44 ct, 1.62 ct each stone",
+      "price": 59,
+      "image": "images/jewelry/mu326n9rr9s2pz.jpg",
+      "created_at": "2026-09-15T19:22:29.344Z"
+    },
+    {
+      "id": "mu31rtrg3hpke8",
+      "title": "Women’s expandable cats eye ring.",
+      "description": "Beautiful cats eye stone set in antique style expandable (adjustable) ring.",
+      "price": 19,
+      "image": "images/jewelry/mu31rtrg3hpke8.jpg",
+      "created_at": "2026-09-15T19:10:57.771Z"
+    },
+    {
+      "id": "mu31ovpqerwdk8",
+      "title": "Men’s tungsten ring",
+      "description": "Beautiful tungsten ring for men. Size 11.5",
+      "price": 59,
+      "image": "images/jewelry/mu31ovpqerwdk8.jpg",
+      "created_at": "2026-09-15T19:08:40.535Z"
+    },
+    {
+      "id": "mu30tpw3v36j7z",
+      "title": "Blue topaz set in antique silver",
+      "description": "Beautiful blue topaz gemstone set in an antique silver band. Size 7.5",
+      "price": 99,
+      "image": "images/jewelry/mu30tpw3v36j7z.jpg",
+      "created_at": "2026-09-15T18:44:26.548Z"
     },
     {
       "id": "mu1szd66b1ra8y",
