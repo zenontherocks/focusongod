@@ -83,11 +83,24 @@
 }
 
 .admin-listing__image {
+  position: relative;
   width: 90px;
   height: 90px;
   flex-shrink: 0;
   border-radius: var(--radius);
   background: linear-gradient(160deg, #cfc7b3, #efe9db) center/cover no-repeat;
+}
+
+.admin-listing__image-count {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
 }
 
 .admin-listing__body {

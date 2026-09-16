@@ -344,9 +344,62 @@ img {
   flex-direction: column;
 }
 
+.listing-card__carousel {
+  position: relative;
+}
+
 .listing-card__image {
   aspect-ratio: 1 / 1;
   background: linear-gradient(160deg, #cfc7b3, #efe9db) center/cover no-repeat;
+  cursor: pointer;
+}
+
+.listing-card__image:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: -3px;
+}
+
+.listing-card__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.listing-card__arrow:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.listing-card__arrow--prev {
+  left: 8px;
+}
+
+.listing-card__arrow--next {
+  right: 8px;
+}
+
+.listing-card__counter {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 
 .listing-card__body {
@@ -377,6 +430,111 @@ img {
 .listings-empty {
   color: var(--color-text-light);
   grid-column: 1 / -1;
+}
+
+/* ---------- Lightbox (full-size image viewer, jewelry page) ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lightbox[hidden] {
+  display: none;
+}
+
+.lightbox__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.lightbox__content {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox__image {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lightbox__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox__arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox__arrow[hidden] {
+  display: none;
+}
+
+.lightbox__arrow--prev {
+  left: -8px;
+}
+
+.lightbox__arrow--next {
+  right: -8px;
+}
+
+@media (max-width: 600px) {
+  .lightbox__arrow--prev {
+    left: 4px;
+  }
+  .lightbox__arrow--next {
+    right: 4px;
+  }
+}
+
+.lightbox__counter {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: #fff;
+  font-size: 0.85rem;
 }
 
 /* ---------- Stub / "coming soon" pages ---------- */

@@ -104,11 +104,13 @@ removing listings — no third party involved at all.
 
 - `admin.html` + `js/admin.js` — the console itself. Enter the admin
   password once (stored in `sessionStorage`, so it's re-asked each new
-  browser session) to unlock a form (photo, title, optional
+  browser session) to unlock a form (photos, title, optional
   description, price) and a list of current listings with a Delete
-  button on each. Photos are resized/compressed client-side (max 1200px
-  on the long edge, JPEG) before upload, to keep things fast and the
-  repo lean.
+  button on each. A listing can have **up to 8 photos** — the file
+  input accepts multiple files, each resized/compressed client-side
+  (max 1200px on the long edge, JPEG) before upload, to keep things
+  fast and the repo lean. A listing with more than one photo shows a
+  small "+N" badge on its thumbnail in the admin list.
 - This site actually deploys as a **Cloudflare Worker with static
   assets** (not classic "Pages" — that distinction matters for how the
   backend is wired up). `wrangler.jsonc` at the repo root configures
@@ -116,20 +118,27 @@ removing listings — no third party involved at all.
   handful listed in `.assetsignore`, like `src/` and this README) as
   the static site, and `main` points at `src/worker.js`, a small Worker
   script that only runs for requests that *don't* match a static file
-  — i.e. just our three API routes below; every normal page/image/CSS
+  — i.e. just our API routes below; every normal page/image/CSS
   request is served directly without the Worker running at all.
 - `src/worker.js` routes `/api/jewelry-create`, `/api/jewelry-delete`,
   and `/api/jewelry-auth-check` (each implemented in `src/routes/`,
   shared GitHub-API helpers in `src/lib/github.js`) to the matching
   handler. They check the password, then use the GitHub Contents API to
-  commit the new/removed image and the updated
-  `data/jewelry-listings.json` **directly to `main`** — which triggers
-  a normal deploy, same as any other change to this site. That means a
-  new or deleted listing takes roughly **30-90 seconds** to actually
-  appear live (a real deploy happens) — that's expected, not a bug.
+  commit each new/removed image (`images/jewelry/<id>-<index>.<ext>`)
+  and the updated `data/jewelry-listings.json` **directly to `main`**
+  — which triggers a normal deploy, same as any other change to this
+  site. That means a new or deleted listing takes roughly **30-90
+  seconds** to actually appear live (a real deploy happens, and with
+  several photos, several GitHub API calls happen first) — that's
+  expected, not a bug.
 - `js/jewelry-listings.js` — renders `data/jewelry-listings.json` into
-  the grid of cards on `jewelry.html` (image, title, price,
-  description).
+  the grid of cards on `jewelry.html` (title, price, description, and
+  each listing's `images` array). A listing with more than one photo
+  gets left/right arrows and a "1 / N" counter directly on its card;
+  clicking the current photo opens it full-size in a lightbox with its
+  own left/right arrows (also usable via the ArrowLeft/ArrowRight keys)
+  — closes via its X button, clicking outside it, or Escape, same
+  convention as the checkout popup.
 
 **One-time setup required** (two secrets in the Cloudflare dashboard —
 Workers & Pages → this project → Settings → Variables and secrets —

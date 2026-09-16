@@ -9,6 +9,7 @@
   var PASSWORD_KEY = "fog_admin_password";
   var MAX_DIMENSION = 1200;
   var JPEG_QUALITY = 0.82;
+  var MAX_LISTING_IMAGES = 8; // keep in sync with MAX_IMAGES in src/routes/jewelry-create.js
 
   function getStoredPassword() {
     try {
@@ -111,6 +112,10 @@
     return isNaN(date.getTime()) ? "" : date.toLocaleString();
   }
 
+  function itemImages(item) {
+    return item.images && item.images.length ? item.images : item.image ? [item.image] : [];
+  }
+
   function renderListings(items) {
     var container = document.getElementById("admin-listings");
     if (!items.length) {
@@ -119,12 +124,17 @@
     }
     container.innerHTML = items
       .map(function (item) {
-        var imageStyle = item.image
-          ? ' style="background-image: url(\'' + escapeHtml(item.image) + "')\""
+        var images = itemImages(item);
+        var imageStyle = images.length
+          ? ' style="background-image: url(\'' + escapeHtml(images[0]) + "')\""
           : "";
         return (
           '<div class="admin-listing" data-id="' + escapeAttr(item.id) + '">' +
-          '<div class="admin-listing__image"' + imageStyle + "></div>" +
+          '<div class="admin-listing__image"' + imageStyle + ">" +
+          (images.length > 1
+            ? '<span class="admin-listing__image-count">+' + (images.length - 1) + "</span>"
+            : "") +
+          "</div>" +
           '<div class="admin-listing__body">' +
           "<h3>" + escapeHtml(item.title) + "</h3>" +
           '<p class="admin-listing__price">' + formatPrice(item.price) + "</p>" +
@@ -304,22 +314,26 @@
       var title = document.getElementById("listing-title").value.trim();
       var description = document.getElementById("listing-description").value.trim();
       var price = document.getElementById("listing-price").value;
-      var file = fileInput.files[0];
+      var files = Array.prototype.slice.call(fileInput.files);
 
-      if (!file) {
-        listingStatus.textContent = "Please choose a photo.";
+      if (!files.length) {
+        listingStatus.textContent = "Please choose at least one photo.";
+        return;
+      }
+      if (files.length > MAX_LISTING_IMAGES) {
+        listingStatus.textContent = "Please choose at most " + MAX_LISTING_IMAGES + " photos.";
         return;
       }
 
       listingStatus.textContent = "Uploading...";
 
-      resizeImageFile(file)
-        .then(function (imageDataUrl) {
+      Promise.all(files.map(resizeImageFile))
+        .then(function (imageDataUrls) {
           return apiRequest("/api/jewelry-create", {
             title: title,
             description: description,
             price: price,
-            imageDataUrl: imageDataUrl,
+            imageDataUrls: imageDataUrls,
           });
         })
         .then(function () {

@@ -1,11 +1,12 @@
 // POST /api/jewelry-create
-// Body: { title, description, price, imageDataUrl }
-// imageDataUrl must be a base64 data URL (image/png, image/jpeg, or image/webp).
+// Body: { title, description, price, imageDataUrls }
+// imageDataUrls must be a non-empty array of base64 data URLs (image/png,
+// image/jpeg, or image/webp) — one listing can have several photos.
 //
-// Commits the image to images/jewelry/<id>.<ext> and appends the new item to
-// data/jewelry-listings.json, both directly on the `main` branch — which
-// then auto-deploys via this Worker's git integration, same as any other
-// change to the site.
+// Commits each image to images/jewelry/<id>-<index>.<ext> and appends the
+// new item to data/jewelry-listings.json, both directly on the `main`
+// branch — which then auto-deploys via this Worker's git integration, same
+// as any other change to the site.
 
 import {
   DATA_PATH,
@@ -15,6 +16,8 @@ import {
   githubPutFile,
 } from "../lib/github.js";
 import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
+
+const MAX_IMAGES = 8;
 
 export async function handleCreate(request, env) {
   if (!checkAuth(request, env)) return unauthorized();
@@ -26,9 +29,19 @@ export async function handleCreate(request, env) {
     return jsonResponse({ error: "Invalid JSON body" }, 400);
   }
 
-  const { title, description, price, imageDataUrl } = payload || {};
-  if (!title || !imageDataUrl || price === undefined || price === null || price === "") {
-    return jsonResponse({ error: "title, price, and imageDataUrl are required" }, 400);
+  const { title, description, price, imageDataUrls } = payload || {};
+  if (
+    !title ||
+    !Array.isArray(imageDataUrls) ||
+    imageDataUrls.length === 0 ||
+    price === undefined ||
+    price === null ||
+    price === ""
+  ) {
+    return jsonResponse({ error: "title, price, and at least one imageDataUrl are required" }, 400);
+  }
+  if (imageDataUrls.length > MAX_IMAGES) {
+    return jsonResponse({ error: `A listing can have at most ${MAX_IMAGES} images` }, 400);
   }
 
   const priceNumber = Number(price);
@@ -36,19 +49,27 @@ export async function handleCreate(request, env) {
     return jsonResponse({ error: "price must be a non-negative number" }, 400);
   }
 
-  const match = /^data:image\/(png|jpe?g|webp);base64,(.+)$/i.exec(imageDataUrl);
-  if (!match) {
-    return jsonResponse({ error: "imageDataUrl must be a base64 png/jpeg/webp data URL" }, 400);
+  const parsedImages = [];
+  for (const imageDataUrl of imageDataUrls) {
+    const match = /^data:image\/(png|jpe?g|webp);base64,(.+)$/i.exec(imageDataUrl);
+    if (!match) {
+      return jsonResponse({ error: "each image must be a base64 png/jpeg/webp data URL" }, 400);
+    }
+    const rawExt = match[1].toLowerCase();
+    const ext = rawExt === "jpg" ? "jpeg" : rawExt;
+    parsedImages.push({ ext: ext === "jpeg" ? "jpg" : ext, base64Image: match[2] });
   }
-  const rawExt = match[1].toLowerCase();
-  const ext = rawExt === "jpg" ? "jpeg" : rawExt;
-  const base64Image = match[2];
 
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  const imagePath = `images/jewelry/${id}.${ext === "jpeg" ? "jpg" : ext}`;
 
   try {
-    await githubPutFile(env, imagePath, base64Image, `Add jewelry listing image: ${title}`);
+    const imagePaths = [];
+    for (let i = 0; i < parsedImages.length; i++) {
+      const { ext, base64Image } = parsedImages[i];
+      const imagePath = `images/jewelry/${id}-${i}.${ext}`;
+      await githubPutFile(env, imagePath, base64Image, `Add jewelry listing image: ${title}`);
+      imagePaths.push(imagePath);
+    }
 
     const existing = await githubGetFile(env, DATA_PATH);
     const currentData = existing
@@ -60,7 +81,7 @@ export async function handleCreate(request, env) {
       title: String(title).slice(0, 200),
       description: description ? String(description).slice(0, 2000) : "",
       price: priceNumber,
-      image: imagePath,
+      images: imagePaths,
       created_at: new Date().toISOString(),
     };
     currentData.items = [newItem, ...(currentData.items || [])];

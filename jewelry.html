@@ -92,6 +92,17 @@
     </div>
   </div>
 
+  <div id="lightbox" class="lightbox" hidden>
+    <div class="lightbox__overlay" data-lightbox-close></div>
+    <div class="lightbox__content">
+      <button type="button" class="lightbox__close" data-lightbox-close aria-label="Close">&times;</button>
+      <button type="button" class="lightbox__arrow lightbox__arrow--prev" id="lightbox-prev" aria-label="Previous image">&#10094;</button>
+      <img id="lightbox-image" class="lightbox__image" src="" alt="" />
+      <button type="button" class="lightbox__arrow lightbox__arrow--next" id="lightbox-next" aria-label="Next image">&#10095;</button>
+      <p class="lightbox__counter" id="lightbox-counter"></p>
+    </div>
+  </div>
+
   <div id="site-footer"></div>
   <script src="js/site-shell.js"></script>
   <script src="js/dom-utils.js"></script>

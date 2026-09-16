@@ -1,8 +1,8 @@
 // POST /api/jewelry-delete
 // Body: { id }
 //
-// Removes the listing from data/jewelry-listings.json and deletes its
-// image file, both directly on the `main` branch.
+// Removes the listing from data/jewelry-listings.json and deletes all of
+// its image files, both directly on the `main` branch.
 
 import {
   DATA_PATH,
@@ -42,10 +42,11 @@ export async function handleDelete(request, env) {
     const newContentBase64 = toBase64(JSON.stringify(currentData, null, 2) + "\n");
     await githubPutFile(env, DATA_PATH, newContentBase64, `Remove jewelry listing: ${target.title}`, existing.sha);
 
-    if (target.image) {
-      const imageFile = await githubGetFile(env, target.image);
+    const imagesToDelete = target.images && target.images.length ? target.images : target.image ? [target.image] : [];
+    for (const imagePath of imagesToDelete) {
+      const imageFile = await githubGetFile(env, imagePath);
       if (imageFile) {
-        await githubDeleteFile(env, target.image, `Remove jewelry listing image: ${target.title}`, imageFile.sha);
+        await githubDeleteFile(env, imagePath, `Remove jewelry listing image: ${target.title}`, imageFile.sha);
       }
     }
 
