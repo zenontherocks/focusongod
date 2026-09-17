@@ -97,20 +97,26 @@ scraping, and once switched to eBay's official API, the seller's
 Production keyset turned out to be disabled pending an eBay compliance
 process he didn't want to deal with). `jewelry.html` is now fully
 self-hosted: listings live in `data/jewelry-listings.json`, managed
-through `admin.html`, a password-protected page for adding and
-removing listings — no third party involved at all.
+through `admin.html`, a password-protected page for adding, editing,
+and removing listings — no third party involved at all.
 
 **How it works:**
 
 - `admin.html` + `js/admin.js` — the console itself. Enter the admin
   password once (stored in `sessionStorage`, so it's re-asked each new
   browser session) to unlock a form (photos, title, optional
-  description, price) and a list of current listings with a Delete
-  button on each. A listing can have **up to 8 photos** — the file
+  description, price) and a list of current listings, each with Edit
+  and Delete buttons. A listing can have **up to 8 photos** — the file
   input accepts multiple files, each resized/compressed client-side
   (max 1200px on the long edge, JPEG) before upload, to keep things
   fast and the repo lean. A listing with more than one photo shows a
   small "+N" badge on its thumbnail in the admin list.
+  - Clicking **Edit** repopulates the same form (title, description,
+    price, and the listing's current photos as removable thumbnails —
+    click a thumbnail's &times; to drop it) instead of a separate
+    dialog, and switches the submit button to "Save Changes" with a
+    "Cancel Edit" button to back out. New photos can be added alongside
+    whatever existing ones are kept, up to 8 total.
 - This site actually deploys as a **Cloudflare Worker with static
   assets** (not classic "Pages" — that distinction matters for how the
   backend is wired up). `wrangler.jsonc` at the repo root configures
@@ -120,17 +126,20 @@ removing listings — no third party involved at all.
   script that only runs for requests that *don't* match a static file
   — i.e. just our API routes below; every normal page/image/CSS
   request is served directly without the Worker running at all.
-- `src/worker.js` routes `/api/jewelry-create`, `/api/jewelry-delete`,
-  and `/api/jewelry-auth-check` (each implemented in `src/routes/`,
-  shared GitHub-API helpers in `src/lib/github.js`) to the matching
-  handler. They check the password, then use the GitHub Contents API to
-  commit each new/removed image (`images/jewelry/<id>-<index>.<ext>`)
+- `src/worker.js` routes `/api/jewelry-create`, `/api/jewelry-update`,
+  `/api/jewelry-delete`, and `/api/jewelry-auth-check` (each
+  implemented in `src/routes/`, shared GitHub-API helpers in
+  `src/lib/github.js`) to the matching handler. They check the
+  password, then use the GitHub Contents API to commit the
+  added/removed image(s) (`images/jewelry/<id>-<index-or-suffix>.<ext>`)
   and the updated `data/jewelry-listings.json` **directly to `main`**
   — which triggers a normal deploy, same as any other change to this
-  site. That means a new or deleted listing takes roughly **30-90
-  seconds** to actually appear live (a real deploy happens, and with
-  several photos, several GitHub API calls happen first) — that's
-  expected, not a bug.
+  site. That means adding, editing, or deleting a listing takes roughly
+  **30-90 seconds** to actually appear live (a real deploy happens, and
+  with several photos, several GitHub API calls happen first) — that's
+  expected, not a bug. Editing only deletes the specific photos you
+  removed and only uploads the specific photos you added — untouched
+  photos are left alone.
 - `js/jewelry-listings.js` — renders `data/jewelry-listings.json` into
   the grid of cards on `jewelry.html` (title, price, description, and
   each listing's `images` array). A listing with more than one photo

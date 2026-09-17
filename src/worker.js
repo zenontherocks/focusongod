@@ -1,13 +1,15 @@
 // Worker entry point for the focusongod site.
 //
-// This is a static site (served via the ASSETS binding below) with three
-// small API routes bolted on for the jewelry admin console. Cloudflare
-// serves any request that matches a real static file directly, without
-// even invoking this script — this fetch() handler only runs for requests
-// that don't match a static asset (our /api/* routes, plus genuine 404s).
+// This is a static site (served via the ASSETS binding below) with a
+// handful of small API routes bolted on for the jewelry and discussion
+// admin consoles. Cloudflare serves any request that matches a real
+// static file directly, without even invoking this script — this
+// fetch() handler only runs for requests that don't match a static
+// asset (our /api/* routes, plus genuine 404s).
 
 import { handleAuthCheck } from "./routes/jewelry-auth-check.js";
 import { handleCreate } from "./routes/jewelry-create.js";
+import { handleUpdate } from "./routes/jewelry-update.js";
 import { handleDelete } from "./routes/jewelry-delete.js";
 import { handleTopicsList } from "./routes/discussion-topics.js";
 import { handleMessagesList } from "./routes/discussion-messages.js";
@@ -25,6 +27,9 @@ export default {
     }
     if (request.method === "POST" && url.pathname === "/api/jewelry-create") {
       return handleCreate(request, env);
+    }
+    if (request.method === "POST" && url.pathname === "/api/jewelry-update") {
+      return handleUpdate(request, env);
     }
     if (request.method === "POST" && url.pathname === "/api/jewelry-delete") {
       return handleDelete(request, env);

@@ -31,16 +31,20 @@
 
     <section id="admin-content" hidden>
       <div class="admin-card">
-        <h2>Add a new listing</h2>
+        <h2 id="listing-form-heading">Add a new listing</h2>
         <form id="listing-form">
+          <input type="hidden" id="listing-id" value="" />
+          <div class="admin-form__row" id="listing-existing-images-row" hidden>
+            <label>Current Photos (click &times; to remove one)</label>
+            <div id="listing-existing-images" class="admin-existing-images"></div>
+          </div>
           <div class="admin-form__row">
-            <label for="listing-image">Photos * (up to 8)</label>
+            <label for="listing-image" id="listing-image-label">Photos * (up to 8)</label>
             <input
               type="file"
               id="listing-image"
               accept="image/png, image/jpeg, image/webp"
               multiple
-              required
             />
           </div>
           <div class="admin-form__row">
@@ -55,7 +59,8 @@
             <label for="listing-price">Price (USD) *</label>
             <input type="number" id="listing-price" min="0" step="0.01" required />
           </div>
-          <button type="submit" class="btn btn--primary">Add Listing</button>
+          <button type="submit" class="btn btn--primary" id="listing-form-submit">Add Listing</button>
+          <button type="button" class="btn" id="listing-form-cancel" hidden>Cancel Edit</button>
           <p class="admin-status" id="listing-form-status" role="status"></p>
         </form>
       </div>

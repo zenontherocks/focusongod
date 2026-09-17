@@ -1,7 +1,14 @@
-// Jewelry admin console: password gate, resize/upload a new listing photo,
-// and list/delete existing listings. Talks to the Cloudflare Worker routes
-// under src/routes/jewelry-*.js, which commit changes straight to the
-// site's GitHub repo.
+// Jewelry admin console: password gate, add/edit/delete listings (each
+// with up to MAX_LISTING_IMAGES photos), and moderate discussion topics
+// and messages. Talks to the Cloudflare Worker routes under
+// src/routes/jewelry-*.js and src/routes/discussion-*.js, which commit
+// changes straight to the site's GitHub repo (jewelry) or its D1
+// database (discussion).
+//
+// The "Add a new listing" form doubles as the edit form: clicking a
+// listing's Edit button repopulates it (title/description/price, plus
+// its existing photos as removable thumbnails) and switches it into
+// edit mode until submitted or cancelled.
 
 (function () {
   var escapeHtml = window.FogDomUtils.escapeHtml;
@@ -116,8 +123,14 @@
     return item.images && item.images.length ? item.images : item.image ? [item.image] : [];
   }
 
+  var listingsById = {};
+
   function renderListings(items) {
     var container = document.getElementById("admin-listings");
+    listingsById = {};
+    items.forEach(function (item) {
+      listingsById[item.id] = item;
+    });
     if (!items.length) {
       container.innerHTML = '<p class="admin-empty">No listings yet.</p>';
       return;
@@ -139,9 +152,14 @@
           "<h3>" + escapeHtml(item.title) + "</h3>" +
           '<p class="admin-listing__price">' + formatPrice(item.price) + "</p>" +
           (item.description ? "<p>" + escapeHtml(item.description) + "</p>" : "") +
+          '<div class="admin-listing__actions">' +
+          '<button type="button" class="admin-listing__edit" data-id="' +
+          escapeAttr(item.id) +
+          '">Edit</button>' +
           '<button type="button" class="admin-listing__delete" data-id="' +
           escapeAttr(item.id) +
           '">Delete</button>' +
+          "</div>" +
           "</div>" +
           "</div>"
         );
@@ -275,6 +293,72 @@
     var loginStatus = document.getElementById("admin-login-status");
     var listingForm = document.getElementById("listing-form");
     var listingStatus = document.getElementById("listing-form-status");
+    var listingIdField = document.getElementById("listing-id");
+    var listingFormHeading = document.getElementById("listing-form-heading");
+    var listingFormSubmit = document.getElementById("listing-form-submit");
+    var listingFormCancel = document.getElementById("listing-form-cancel");
+    var listingImageLabel = document.getElementById("listing-image-label");
+    var existingImagesRow = document.getElementById("listing-existing-images-row");
+    var existingImagesContainer = document.getElementById("listing-existing-images");
+
+    var editKeepImages = []; // mutable while editing: images kept if the form is submitted
+
+    function renderExistingImages() {
+      existingImagesContainer.innerHTML = editKeepImages
+        .map(function (path) {
+          return (
+            '<div class="admin-existing-image" data-path="' + escapeAttr(path) + '">' +
+            '<div class="admin-existing-image__thumb" style="background-image: url(\'' +
+            escapeHtml(path) +
+            "')\"></div>" +
+            '<button type="button" class="admin-existing-image__remove" aria-label="Remove this photo">&times;</button>' +
+            "</div>"
+          );
+        })
+        .join("");
+    }
+
+    function enterEditMode(item) {
+      listingIdField.value = item.id;
+      editKeepImages = itemImages(item).slice();
+      document.getElementById("listing-title").value = item.title || "";
+      document.getElementById("listing-description").value = item.description || "";
+      document.getElementById("listing-price").value = item.price != null ? item.price : "";
+      document.getElementById("listing-image").value = "";
+
+      existingImagesRow.hidden = false;
+      renderExistingImages();
+      listingImageLabel.textContent = "Add more photos (optional, up to " + MAX_LISTING_IMAGES + " total)";
+      listingFormHeading.textContent = "Edit listing";
+      listingFormSubmit.textContent = "Save Changes";
+      listingFormCancel.hidden = false;
+      listingStatus.textContent = "";
+      listingForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function exitEditMode() {
+      listingIdField.value = "";
+      editKeepImages = [];
+      existingImagesRow.hidden = true;
+      existingImagesContainer.innerHTML = "";
+      listingImageLabel.textContent = "Photos * (up to " + MAX_LISTING_IMAGES + ")";
+      listingFormHeading.textContent = "Add a new listing";
+      listingFormSubmit.textContent = "Add Listing";
+      listingFormCancel.hidden = true;
+      listingForm.reset();
+    }
+
+    listingFormCancel.addEventListener("click", exitEditMode);
+
+    existingImagesContainer.addEventListener("click", function (event) {
+      var button = event.target.closest(".admin-existing-image__remove");
+      if (!button) return;
+      var path = button.closest(".admin-existing-image").getAttribute("data-path");
+      editKeepImages = editKeepImages.filter(function (p) {
+        return p !== path;
+      });
+      renderExistingImages();
+    });
 
     function unlock() {
       lockSection.hidden = true;
@@ -315,6 +399,42 @@
       var description = document.getElementById("listing-description").value.trim();
       var price = document.getElementById("listing-price").value;
       var files = Array.prototype.slice.call(fileInput.files);
+      var editingId = listingIdField.value;
+
+      if (editingId) {
+        var totalImages = editKeepImages.length + files.length;
+        if (totalImages === 0) {
+          listingStatus.textContent = "A listing needs at least one photo.";
+          return;
+        }
+        if (totalImages > MAX_LISTING_IMAGES) {
+          listingStatus.textContent = "A listing can have at most " + MAX_LISTING_IMAGES + " photos total.";
+          return;
+        }
+
+        listingStatus.textContent = "Saving...";
+
+        Promise.all(files.map(resizeImageFile))
+          .then(function (newImageDataUrls) {
+            return apiRequest("/api/jewelry-update", {
+              id: editingId,
+              title: title,
+              description: description,
+              price: price,
+              keepImages: editKeepImages,
+              newImageDataUrls: newImageDataUrls,
+            });
+          })
+          .then(function () {
+            listingStatus.textContent = "Saved! Changes will appear shortly.";
+            exitEditMode();
+            loadListings();
+          })
+          .catch(function (err) {
+            listingStatus.textContent = "Error: " + err.message;
+          });
+        return;
+      }
 
       if (!files.length) {
         listingStatus.textContent = "Please choose at least one photo.";
@@ -347,6 +467,13 @@
     });
 
     document.getElementById("admin-listings").addEventListener("click", function (event) {
+      var editButton = event.target.closest(".admin-listing__edit");
+      if (editButton) {
+        var item = listingsById[editButton.getAttribute("data-id")];
+        if (item) enterEditMode(item);
+        return;
+      }
+
       var button = event.target.closest(".admin-listing__delete");
       if (!button) return;
       var id = button.getAttribute("data-id");
@@ -355,6 +482,7 @@
       button.textContent = "Deleting...";
       apiRequest("/api/jewelry-delete", { id: id })
         .then(function () {
+          if (listingIdField.value === id) exitEditMode();
           loadListings();
         })
         .catch(function (err) {
