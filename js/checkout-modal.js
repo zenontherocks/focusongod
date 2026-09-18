@@ -14,7 +14,9 @@
 //   data-item-heading  (optional) — payment-step heading prefix, defaults
 //                                    to "Complete Your Purchase"
 //
-// See README.md for how to set up the real Formspree endpoint.
+// The shipping form posts to /api/shipping-submit (a Worker route),
+// not directly to Formspree — see README.md's "Spam prevention"
+// section for why, and where the real Formspree endpoint now lives.
 
 (function () {
   var CASHAPP_HANDLE = "$FocusonGod4ever";

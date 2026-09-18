@@ -95,7 +95,7 @@
         <h2 id="checkout-modal-title">Shipping Details</h2>
         <p>Fill this out first so we know where to send your book, then choose how you'd like to pay.</p>
 
-        <form id="shipping-form" class="shipping-form" action="https://formspree.io/f/meaqdvbv" method="POST">
+        <form id="shipping-form" class="shipping-form" action="/api/shipping-submit" method="POST">
           <input type="hidden" id="shipping-form-subject" name="_subject" value="" />
           <div class="visually-hidden-field" aria-hidden="true">
             <label for="shipping-form-gotcha">Leave this field blank</label>

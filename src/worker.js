@@ -17,6 +17,7 @@ import { handleMessageCreate } from "./routes/discussion-message-create.js";
 import { handleTopicCreate } from "./routes/discussion-topic-create.js";
 import { handleTopicDelete } from "./routes/discussion-topic-delete.js";
 import { handleMessageDelete } from "./routes/discussion-message-delete.js";
+import { handleShippingSubmit } from "./routes/shipping-submit.js";
 
 export default {
   async fetch(request, env) {
@@ -52,6 +53,10 @@ export default {
     }
     if (request.method === "POST" && url.pathname === "/api/discussion-message-delete") {
       return handleMessageDelete(request, env);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/shipping-submit") {
+      return handleShippingSubmit(request, env);
     }
 
     // Not one of our API routes — fall back to static asset serving

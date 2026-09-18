@@ -68,12 +68,16 @@ Clicking any `.buy-button` opens the shared popup to two steps shown one
 at a time:
 
 1. **Shipping form** — collects name/address so orders can be shipped.
-   Submits to Formspree (`https://formspree.io/f/meaqdvbv`) over
-   `fetch`, so the page never reloads. Every submission emails straight
-   to the inbox that endpoint was created with, and also shows up in the
-   Formspree dashboard. Free tier: 50 submissions/month, resets monthly.
-   To point every page at a different Formspree form later, change the
-   `action` URL on each page's `<form id="shipping-form" ...>`.
+   Submits over `fetch` to `/api/shipping-submit` (a Worker route, see
+   "Spam prevention" below for why it's not a direct Formspree
+   `action` URL anymore), so the page never reloads. That route
+   forwards valid submissions on to Formspree
+   (`https://formspree.io/f/meaqdvbv`), which emails straight to the
+   inbox that endpoint was created with and also shows up in the
+   Formspree dashboard. Free tier: 50 submissions/month, resets
+   monthly. To point every page at a different Formspree form later,
+   change `FORMSPREE_URL` in `src/routes/shipping-submit.js` (one
+   place now, instead of each page's form `action`).
 2. **Payment step** — shown automatically once the shipping form succeeds
    (no page navigation, no second click). Has the three payment buttons
    (CashApp, PayPal, Venmo), all pointed at the same three accounts —
@@ -92,30 +96,58 @@ key, and returns focus to the button that opened it.
 
 ### Spam prevention
 
-The shipping form on every page (book, dog treats, jewelry) includes a
-hidden honeypot field — `<input name="_gotcha">`, invisible and
-unreachable by keyboard, styled via the shared `.visually-hidden-field`
-class in `css/styles.css`. Formspree recognizes that field name
-specifically: if it ever arrives filled in, Formspree silently discards
-the submission (no email, nothing in the dashboard) instead of
-rejecting it, so a bot never learns it was caught. Real visitors never
-see or reach the field, so this costs nothing in normal use — it just
-quietly filters out the unsophisticated bots responsible for most
-Formspree spam.
+The shipping form's real destination — Formspree — is never visible to
+the browser. Each page's `<form action="/api/shipping-submit">` posts
+to a Cloudflare Worker route (`src/routes/shipping-submit.js`) that
+validates the submission and only then forwards it server-side to the
+actual `https://formspree.io/f/meaqdvbv` endpoint (a constant in that
+file, not a secret — hiding it from public HTML is the point, not
+hiding it from the repo).
 
-If spam keeps getting through despite this, the next step up is
-Formspree's own reCAPTCHA/custom spam-rule features — but those are
-gated behind Formspree's paid plan ($15/mo as of writing), so worth
-trying the free honeypot fix first.
+This exists because of a specific spam pattern: submissions arriving
+with *only* the optional Address Line 2 field filled (garbage like
+"1337 1337") and every required field empty. That could only happen by
+skipping this site's page entirely — the browser's own `required`
+attributes make that impossible through the real form — which means it
+was a script hitting the public Formspree URL directly. That's a
+common, low-effort form of spam: crawlers scan public sites for
+`formspree.io/f/<id>` URLs and blast generic templated field-name
+guesses at whatever they find, hoping a name or two matches. Since the
+URL used to sit in plain HTML, anyone (or anything) that viewed page
+source had it.
+
+Routing through our own Worker route closes that off two ways:
+1. The Formspree URL itself is no longer visible in anything the
+   browser downloads, so it can't be scraped and targeted directly
+   from this site's pages anymore.
+2. `handleShippingSubmit` re-checks the same required fields (name,
+   address line 1, city, state, zip) *server-side*, where skipping the
+   page's HTML/JS doesn't help — a request missing any of them is
+   rejected with a 400 before it ever reaches Formspree.
+
+The hidden honeypot field (`<input name="_gotcha">`, invisible and
+unreachable by keyboard, styled via the shared `.visually-hidden-field`
+class in `css/styles.css`) is still there and still checked — now by
+our own route rather than relying on Formspree to recognize the field
+name, though it does that too as a second layer. If it arrives filled
+in, the route returns a normal-looking success without forwarding
+anything, so whatever filled it never learns it was caught.
+
+Our own `/api/shipping-submit` endpoint is still a public, unauthenticated
+URL in principle (it has to be — real customers aren't logged in), so
+a determined script could still find and hit it with fabricated-but-
+complete fields that pass validation. If that starts happening, the
+next steps up are Formspree's reCAPTCHA/custom spam-rule features
+(gated behind their paid plan, $15/mo as of writing) or basic per-IP
+rate-limiting on this route itself, the same pattern already used for
+the discussion page's message posting.
 
 We deliberately did *not* reorder the flow to require payment before
 sending the shipping form: there's no way to verify a CashApp/PayPal/
 Venmo payment actually happened (those are just links to external
-apps, no callback to this site), and bots that spam a public form don't
-care what order the page's steps are in anyway — they either skip the
-page's JS entirely and POST straight to the Formspree endpoint, or run
-it and click through whatever's there. Reordering wouldn't have
-stopped any of that; the honeypot actually does.
+apps, no callback to this site), and the actual spam here was arriving
+via direct API calls that don't go through this page's steps at all —
+reordering them wouldn't have touched that.
 
 ## Jewelry/Other for Sale — admin console (no eBay involved)
 
