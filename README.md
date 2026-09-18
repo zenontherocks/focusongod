@@ -90,6 +90,33 @@ at all.
 The popup closes via its X button, clicking outside it, or the Escape
 key, and returns focus to the button that opened it.
 
+### Spam prevention
+
+The shipping form on every page (book, dog treats, jewelry) includes a
+hidden honeypot field — `<input name="_gotcha">`, invisible and
+unreachable by keyboard, styled via the shared `.visually-hidden-field`
+class in `css/styles.css`. Formspree recognizes that field name
+specifically: if it ever arrives filled in, Formspree silently discards
+the submission (no email, nothing in the dashboard) instead of
+rejecting it, so a bot never learns it was caught. Real visitors never
+see or reach the field, so this costs nothing in normal use — it just
+quietly filters out the unsophisticated bots responsible for most
+Formspree spam.
+
+If spam keeps getting through despite this, the next step up is
+Formspree's own reCAPTCHA/custom spam-rule features — but those are
+gated behind Formspree's paid plan ($15/mo as of writing), so worth
+trying the free honeypot fix first.
+
+We deliberately did *not* reorder the flow to require payment before
+sending the shipping form: there's no way to verify a CashApp/PayPal/
+Venmo payment actually happened (those are just links to external
+apps, no callback to this site), and bots that spam a public form don't
+care what order the page's steps are in anyway — they either skip the
+page's JS entirely and POST straight to the Formspree endpoint, or run
+it and click through whatever's there. Reordering wouldn't have
+stopped any of that; the honeypot actually does.
+
 ## Jewelry/Other for Sale — admin console (no eBay involved)
 
 An eBay-based sync was tried and abandoned (bot-protection blocked

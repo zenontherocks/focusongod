@@ -287,6 +287,21 @@ img {
   font-weight: 600;
 }
 
+/* Honeypot field for the shipping form's Formspree submission (see
+   README.md's "Spam prevention" section): invisible and unreachable by
+   keyboard/AT for real visitors, but a plain <input> a simple bot will
+   still find and fill in. Deliberately not display:none — some bots
+   skip those. Formspree recognizes a field named _gotcha and silently
+   discards any submission where it's filled in. */
+.visually-hidden-field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .checkout__buttons {
   display: flex;
   justify-content: center;

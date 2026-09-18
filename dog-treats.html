@@ -120,6 +120,10 @@
 
         <form id="shipping-form" class="shipping-form" action="https://formspree.io/f/meaqdvbv" method="POST">
           <input type="hidden" id="shipping-form-subject" name="_subject" value="" />
+          <div class="visually-hidden-field" aria-hidden="true">
+            <label for="shipping-form-gotcha">Leave this field blank</label>
+            <input type="text" id="shipping-form-gotcha" name="_gotcha" tabindex="-1" autocomplete="off" />
+          </div>
           <div class="shipping-form__row">
             <label for="ship-name">Full Name *</label>
             <input type="text" id="ship-name" name="name" required />

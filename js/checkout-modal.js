@@ -40,8 +40,11 @@
     var submitBtn = form.querySelector('button[type="submit"]');
     var openerButton = null;
 
+    // input:not([tabindex="-1"]) also excludes the shipping form's hidden
+    // honeypot field (type="text" but tabindex="-1") from ever receiving
+    // keyboard focus — same reasoning as excluding type="hidden" fields.
     var FOCUSABLE_SELECTOR =
-      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]):not([tabindex="-1"]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     function focusableElements() {
       return dialog.querySelectorAll(FOCUSABLE_SELECTOR);
