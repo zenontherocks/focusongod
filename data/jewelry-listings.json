@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T19:19:26.657Z",
+  "generated_at": "2026-09-21T19:20:22.195Z",
   "items": [
     {
       "id": "mubmp0b7pmhdce",
@@ -10,16 +10,6 @@
         "images/jewelry/mubmp0b7pmhdce-0.jpg"
       ],
       "created_at": "2026-09-21T19:18:47.943Z"
-    },
-    {
-      "id": "mubmiwvtpg3dip",
-      "title": "Metal and enamel pendant",
-      "description": "Looks like stained glass, several rhinestones, and made of stainless steel",
-      "price": 19.99,
-      "images": [
-        "images/jewelry/mubmiwvtpg3dip-0.jpg"
-      ],
-      "created_at": "2026-09-21T19:14:03.552Z"
     },
     {
       "id": "mubmiu9enuuaf2",
