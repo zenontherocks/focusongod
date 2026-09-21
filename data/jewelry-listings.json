@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T19:46:16.353Z",
+  "generated_at": "2026-09-21T19:55:20.448Z",
   "items": [
     {
       "id": "mubmp0b7pmhdce",
@@ -37,7 +37,11 @@
       "title": "Bomb Party “Spring Stacks,\" bracelet.",
       "description": "“Spring Stacks\" collection, features synthetic lab-created gemstones set in a rose gold-plated, mesh/woven chain band. The original retail price for items in these collections is generally $122.00..",
       "price": 44.95,
-      "image": "images/jewelry/mu3594jehzcnkq.jpg",
+      "images": [
+        "images/jewelry/mu3594jehzcnkq.jpg",
+        "images/jewelry/mu3594jehzcnkq-mubnzz9hhq35rj.jpg",
+        "images/jewelry/mu3594jehzcnkq-mubo00dchubgx3.jpg"
+      ],
       "created_at": "2026-09-15T20:48:23.925Z"
     },
     {
