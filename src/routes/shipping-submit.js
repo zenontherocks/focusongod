@@ -16,6 +16,7 @@
 import { jsonResponse } from "../lib/http.js";
 
 const FORMSPREE_URL = "https://formspree.io/f/meaqdvbv";
+const SITE_ORIGIN = "https://focusongod.win";
 const MAX_FIELD_LENGTH = 300;
 const MAX_NOTE_LENGTH = 2000;
 
@@ -58,10 +59,27 @@ export async function handleShippingSubmit(request) {
     _subject: cleanField(form.get("_subject")),
   };
 
+  // Forward the browser's real Referer when we have one (a normal
+  // same-origin fetch to this route always carries one), falling back
+  // to the site's own URL. This matters because this request is now a
+  // server-to-server call with no browser attached to it at all — with
+  // no Referer, Formspree's "Restrict to Domain" setting (if enabled on
+  // this form) treats the submission as coming from an unrecognized
+  // site and quietly files it under spam instead of emailing it, while
+  // still returning a normal-looking success response. That's exactly
+  // how a real order went missing: the checkout flow completed fine
+  // from the buyer's side, but the submission never reached the inbox.
+  const referer = request.headers.get("Referer") || SITE_ORIGIN + "/";
+
   try {
     const res = await fetch(FORMSPREE_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Referer: referer,
+        Origin: SITE_ORIGIN,
+      },
       body: JSON.stringify(payload),
     });
     if (!res.ok) {

@@ -149,6 +149,25 @@ apps, no callback to this site), and the actual spam here was arriving
 via direct API calls that don't go through this page's steps at all —
 reordering them wouldn't have touched that.
 
+**Regression this proxy caused, now fixed:** routing through our own
+Worker turned a real customer's order into a lost one. Their checkout
+completed normally — the page showed the payment step, they paid — but
+the shipping details never reached the inbox. The cause: this route's
+own `fetch()` to Formspree is a server-to-server call with no browser
+attached, so it carries no `Referer` header at all. If a Formspree
+form has "Restrict to Domain" turned on (a legitimate anti-abuse
+setting, and the likely reason the friend didn't notice it was even a
+risk), a missing or non-matching Referer doesn't get rejected outright
+— Formspree still returns a normal-looking success, but files the
+submission under spam instead of emailing it. `handleShippingSubmit`
+now forwards the incoming request's real `Referer` (present on any
+genuine same-origin submission from this site) — or `SITE_ORIGIN` as a
+fallback if one's ever missing — plus an `Origin` header, on the
+outgoing Formspree request, restoring what a direct browser submission
+would have sent. **If a similar gap shows up again: check Formspree's
+spam folder first** — a "missing" order may well be sitting there, not
+actually gone.
+
 ## Jewelry/Other for Sale — admin console (no eBay involved)
 
 An eBay-based sync was tried and abandoned (bot-protection blocked
