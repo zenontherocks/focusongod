@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T02:04:40.094Z",
+  "generated_at": "2026-09-22T02:05:38.428Z",
   "items": [
     {
       "id": "muc16uk1mdlpx1",
@@ -39,10 +39,12 @@
     {
       "id": "mubmf41gugd5ch",
       "title": "Handmade bracelet - leaf",
-      "description": "Really neat, original handmade bracelet with a brass leaf. It is adjustable.",
+      "description": "Really neat, original handmade bracelet with a brass leaf. It is adjustable.\n\n* I pay the shipping",
       "price": 24.99,
       "images": [
-        "images/jewelry/mubmf41gugd5ch-0.jpg"
+        "images/jewelry/mubmf41gugd5ch-0.jpg",
+        "images/jewelry/mubmf41gugd5ch-muc18716p2nz2a.jpg",
+        "images/jewelry/mubmf41gugd5ch-muc187t1xm1z9h.jpg"
       ],
       "created_at": "2026-09-21T19:11:06.238Z"
     },
