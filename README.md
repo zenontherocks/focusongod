@@ -11,9 +11,15 @@ in a browser to preview, or upload the whole folder to any static host
 - `dog-treats.html` — "Mack's Snacks" (fully built) — same hero/detail/checkout pattern as the book page, see below
 - `admin.html` — password-protected console for adding/removing jewelry
   listings and discussion topics/messages, see below
-- `discussion.html` — "Discussion" (fully built) — topics curated via
+- `discussion.html` — **currently hidden** (shows a simple "unavailable"
+  message, no navbar link). The full feature — topics curated via
   `admin.html`, one flat message feed per topic, no login required to
-  post, see below
+  post — is still fully built and documented below; it was taken down
+  because it became a moderation problem, and is slated for full
+  removal (admin sections, `src/routes/discussion-*.js`, the D1
+  database, all of it) in a future pass. Until then the underlying
+  code/data/backend are untouched, just not linked to or reachable
+  through the site's normal navigation.
 
 ## Editing text
 
