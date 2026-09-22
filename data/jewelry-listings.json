@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T02:05:38.428Z",
+  "generated_at": "2026-09-22T02:10:39.397Z",
   "items": [
     {
       "id": "muc16uk1mdlpx1",
@@ -105,7 +105,12 @@
       "title": "Men’s tungsten ring",
       "description": "Beautiful tungsten ring for men. Size 11.5",
       "price": 59,
-      "image": "images/jewelry/mu31ovpqerwdk8.jpg",
+      "images": [
+        "images/jewelry/mu31ovpqerwdk8.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1emie3s5n01.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1ena5qrkdkf.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1eo4lqm0a37.jpg"
+      ],
       "created_at": "2026-09-15T19:08:40.535Z"
     },
     {
