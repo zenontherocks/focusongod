@@ -1,12 +1,111 @@
 {
-  "generated_at": "2026-09-15T20:48:23.925Z",
+  "generated_at": "2026-09-22T14:47:19.722Z",
   "items": [
+    {
+      "id": "mucsfqso6z2y8t",
+      "title": "Walking with the Lord",
+      "description": "Walking with the Lord, 4” x 6” sticker. I pay the shipping on everything available.",
+      "price": 4.99,
+      "images": [
+        "images/jewelry/mucsfqso6z2y8t-0.jpg"
+      ],
+      "created_at": "2026-09-22T14:47:19.722Z"
+    },
+    {
+      "id": "mucscnmn7z8v62",
+      "title": "Walking with the Lord",
+      "description": "Walking with the Lord sticker. 4” x 6”. Shipping is included, I pay the shipping.",
+      "price": 4.99,
+      "images": [
+        "images/jewelry/mucscnmn7z8v62-0.jpg"
+      ],
+      "created_at": "2026-09-22T14:44:55.617Z"
+    },
+    {
+      "id": "mucs9hrjtiuppq",
+      "title": "Walking with the Lord -stickers",
+      "description": "4” x 6” stickers, walking with the Lord. I will include one (free), with each jewelry sale, also offering them separately. $9.99 for both stickers, that includes shipping. I am also offering them separately, for $5  \n* I pay for the shipping on everything available",
+      "price": 9.99,
+      "images": [
+        "images/jewelry/mucs9hrjtiuppq-0.jpg",
+        "images/jewelry/mucs9hrjtiuppq-1.jpg"
+      ],
+      "created_at": "2026-09-22T14:42:29.325Z"
+    },
+    {
+      "id": "muc1pmrzm79oha",
+      "title": "vintage Southwestern-style silver-tone pendant",
+      "description": "This is a vintage Southwestern-style silver-tone pendant necklace featuring bright turquoise-colored petal accents arranged in a circular sunburst pattern, comes with vintage metal alloy necklace.\n* I pay the shipping cost",
+      "price": 29.99,
+      "images": [
+        "images/jewelry/muc1pmrzm79oha-0.jpg",
+        "images/jewelry/muc1pmrzm79oha-1.jpg",
+        "images/jewelry/muc1pmrzm79oha-2.jpg"
+      ],
+      "created_at": "2026-09-22T02:19:13.632Z"
+    },
+    {
+      "id": "muc16uk1mdlpx1",
+      "title": "Antique brass elephant pendant with rhinestones",
+      "description": "Antique brass, with an \"antique bronze,\" tone plated finish elephant pendant, with necklace. This antique pendant is detailed with colorful inlaid rhinestones.\n\n* I pay the shipping cost",
+      "price": 27.99,
+      "images": [
+        "images/jewelry/muc16uk1mdlpx1-muc1jnb9ngvvfx.jpg",
+        "images/jewelry/muc16uk1mdlpx1-muc1qeubw93beq.jpg",
+        "images/jewelry/muc16uk1mdlpx1-muc1qfsg9lszmh.jpg",
+        "images/jewelry/muc16uk1mdlpx1-muc1qgkrbxe2e0.jpg",
+        "images/jewelry/muc16uk1mdlpx1-muc1qhvcszdctc.jpg",
+        "images/jewelry/muc16uk1mdlpx1-muc1qisb6j8iit.jpg"
+      ],
+      "created_at": "2026-09-22T02:04:40.094Z"
+    },
+    {
+      "id": "mubmp0b7pmhdce",
+      "title": "turquoise pendant necklace",
+      "description": "A silver-toned chain necklace featuring a round floral cluster pendant with a central synthetic turquoise-colored stone and surrounding synthetic teardrop-shaped accents. * I pay the shipping",
+      "price": 29.99,
+      "images": [
+        "images/jewelry/mubmp0b7pmhdce-0.jpg"
+      ],
+      "created_at": "2026-09-21T19:18:47.943Z"
+    },
+    {
+      "id": "mubmiu9enuuaf2",
+      "title": "Metal and enamel pendant",
+      "description": "Silver tone pendant with a multicolor abstract geometric acrylic inlay and clear rhinestone accents.\n* I pay the shipping cost",
+      "price": 27.99,
+      "images": [
+        "images/jewelry/mubmiu9enuuaf2-mubmrtwnmm9nim.jpg",
+        "images/jewelry/mubmiu9enuuaf2-mubnock1auy832.jpg",
+        "images/jewelry/mubmiu9enuuaf2-muc1v1z0buh4g0.jpg",
+        "images/jewelry/mubmiu9enuuaf2-muc1v2xfsafrih.jpg",
+        "images/jewelry/mubmiu9enuuaf2-muc1v3ptou3j17.jpg",
+        "images/jewelry/mubmiu9enuuaf2-muc1v4io3raw1s.jpg",
+        "images/jewelry/mubmiu9enuuaf2-muc1v59rxgl460.jpg"
+      ],
+      "created_at": "2026-09-21T19:14:00.278Z"
+    },
+    {
+      "id": "mubmf41gugd5ch",
+      "title": "Handmade bracelet - leaf",
+      "description": "Really neat, original handmade bracelet with a brass leaf. It is adjustable.\n\n* I pay the shipping",
+      "price": 24.99,
+      "images": [
+        "images/jewelry/mubmf41gugd5ch-muc18716p2nz2a.jpg",
+        "images/jewelry/mubmf41gugd5ch-muc187t1xm1z9h.jpg"
+      ],
+      "created_at": "2026-09-21T19:11:06.238Z"
+    },
     {
       "id": "mu3594jehzcnkq",
       "title": "Bomb Party “Spring Stacks,\" bracelet.",
       "description": "“Spring Stacks\" collection, features synthetic lab-created gemstones set in a rose gold-plated, mesh/woven chain band. The original retail price for items in these collections is generally $122.00..",
       "price": 44.95,
-      "image": "images/jewelry/mu3594jehzcnkq.jpg",
+      "images": [
+        "images/jewelry/mu3594jehzcnkq-muc31uthogecsh.jpg",
+        "images/jewelry/mu3594jehzcnkq-muc344pu06rdk2.jpg",
+        "images/jewelry/mu3594jehzcnkq-muc345hc3cuo9b.jpg"
+      ],
       "created_at": "2026-09-15T20:48:23.925Z"
     },
     {
@@ -54,15 +153,27 @@
       "title": "Men’s tungsten ring",
       "description": "Beautiful tungsten ring for men. Size 11.5",
       "price": 59,
-      "image": "images/jewelry/mu31ovpqerwdk8.jpg",
+      "images": [
+        "images/jewelry/mu31ovpqerwdk8.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1emie3s5n01.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1ena5qrkdkf.jpg",
+        "images/jewelry/mu31ovpqerwdk8-muc1eo4lqm0a37.jpg"
+      ],
       "created_at": "2026-09-15T19:08:40.535Z"
     },
     {
       "id": "mu30tpw3v36j7z",
       "title": "Blue topaz set in antique silver",
-      "description": "Beautiful blue topaz gemstone set in an antique silver band. Size 7.5",
-      "price": 99,
-      "image": "images/jewelry/mu30tpw3v36j7z.jpg",
+      "description": "Beautiful antique blue topaz gemstone set in an antique silver band. Size 7.5",
+      "price": 99.99,
+      "images": [
+        "images/jewelry/mu30tpw3v36j7z-muc27p7gabb35u.jpg",
+        "images/jewelry/mu30tpw3v36j7z-muc27pz0rj4erq.jpg",
+        "images/jewelry/mu30tpw3v36j7z-muc27qs3jqydtf.jpg",
+        "images/jewelry/mu30tpw3v36j7z-muc27rgktb6n3w.jpg",
+        "images/jewelry/mu30tpw3v36j7z-muc27sa36bivps.jpg",
+        "images/jewelry/mu30tpw3v36j7z-muc27t3k6svgcz.jpg"
+      ],
       "created_at": "2026-09-15T18:44:26.548Z"
     },
     {
@@ -70,7 +181,11 @@
       "title": "Sancrest antique bracelet",
       "description": "Beautiful Sancrest antique bracelet",
       "price": 125,
-      "image": "images/jewelry/mu1szd66b1ra8y.jpg",
+      "images": [
+        "images/jewelry/mu1szd66b1ra8y.jpg",
+        "images/jewelry/mu1szd66b1ra8y-muc1issqka5ypn.jpg",
+        "images/jewelry/mu1szd66b1ra8y-muc1itl491rlbe.jpg"
+      ],
       "created_at": "2026-09-14T22:17:07.135Z"
     }
   ]
