@@ -553,8 +553,9 @@ img {
 }
 
 /* ---------- Stub / "coming soon" pages ---------- */
-/* Dog Treats and Discussion are placeholders until those
-   sections get built in a future round. */
+/* Reusable convention for any section that's either not built yet or
+   has been taken down: a simple centered heading + message, no page-
+   specific markup needed beyond <main class="stub-page">. */
 
 .stub-page {
   padding: 90px 20px;

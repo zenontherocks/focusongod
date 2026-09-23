@@ -1,7 +1,7 @@
 // Tiny shared DOM-escaping helpers used anywhere user-entered text (a
-// jewelry listing, a discussion message, an admin form) gets inserted
-// into rendered HTML. Exposed as window.FogDomUtils since these plain
-// pages don't use a module bundler.
+// jewelry listing, an admin form) gets inserted into rendered HTML.
+// Exposed as window.FogDomUtils since these plain pages don't use a
+// module bundler.
 
 (function () {
   function escapeHtml(value) {

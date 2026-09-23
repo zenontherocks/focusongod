@@ -1,9 +1,7 @@
-// Jewelry admin console: password gate, add/edit/delete listings (each
-// with up to MAX_LISTING_IMAGES photos), and moderate discussion topics
-// and messages. Talks to the Cloudflare Worker routes under
-// src/routes/jewelry-*.js and src/routes/discussion-*.js, which commit
-// changes straight to the site's GitHub repo (jewelry) or its D1
-// database (discussion).
+// Jewelry admin console: password gate, add/edit/delete listings, each
+// with up to MAX_LISTING_IMAGES photos. Talks to the Cloudflare Worker
+// routes under src/routes/jewelry-*.js, which commit changes straight
+// to the site's GitHub repo.
 //
 // The "Add a new listing" form doubles as the edit form: clicking a
 // listing's Edit button repopulates it (title/description/price, plus
@@ -92,31 +90,9 @@
     });
   }
 
-  function fetchJson(path) {
-    return fetch(path).then(function (response) {
-      return response.text().then(function (text) {
-        var data = {};
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (e) {
-          // Non-JSON response — fall through with an empty object.
-        }
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status + (data.error ? ": " + data.error : ""));
-        }
-        return data;
-      });
-    });
-  }
-
   function formatPrice(value) {
     var num = Number(value);
     return isNaN(num) ? "" : "$" + num.toFixed(2);
-  }
-
-  function formatDate(isoString) {
-    var date = new Date(isoString);
-    return isNaN(date.getTime()) ? "" : date.toLocaleString();
   }
 
   function itemImages(item) {
@@ -178,108 +154,6 @@
       .then(function (data) {
         statusEl.textContent = "";
         renderListings((data && data.items) || []);
-      })
-      .catch(function (err) {
-        statusEl.textContent = err.message;
-      });
-  }
-
-  function renderTopics(topics) {
-    var container = document.getElementById("admin-topics");
-    if (!topics.length) {
-      container.innerHTML = '<p class="admin-empty">No discussion topics yet.</p>';
-      return;
-    }
-    container.innerHTML = topics
-      .map(function (topic) {
-        return (
-          '<div class="admin-listing" data-id="' + escapeAttr(topic.id) + '">' +
-          '<div class="admin-listing__body">' +
-          "<h3>" + escapeHtml(topic.title) + "</h3>" +
-          (topic.description ? "<p>" + escapeHtml(topic.description) + "</p>" : "") +
-          '<button type="button" class="admin-listing__delete admin-topic__delete" data-id="' +
-          escapeAttr(topic.id) +
-          '">Delete</button>' +
-          "</div>" +
-          "</div>"
-        );
-      })
-      .join("");
-  }
-
-  function populateModerationSelect(topics) {
-    var select = document.getElementById("moderation-topic-select");
-    var currentValue = select.value;
-    var options = ['<option value="">Select a topic…</option>'].concat(
-      topics.map(function (topic) {
-        return '<option value="' + escapeAttr(topic.id) + '">' + escapeHtml(topic.title) + "</option>";
-      })
-    );
-    select.innerHTML = options.join("");
-    if (topics.some(function (t) { return t.id === currentValue; })) {
-      select.value = currentValue;
-    }
-  }
-
-  function loadTopics() {
-    var statusEl = document.getElementById("topics-status");
-    statusEl.textContent = "Loading...";
-    return fetchJson("/api/discussion-topics")
-      .then(function (data) {
-        statusEl.textContent = "";
-        var topics = (data && data.topics) || [];
-        renderTopics(topics);
-        populateModerationSelect(topics);
-        return topics;
-      })
-      .catch(function (err) {
-        statusEl.textContent = err.message;
-      });
-  }
-
-  function renderMessages(messages) {
-    var container = document.getElementById("admin-messages");
-    if (!messages.length) {
-      container.innerHTML = '<p class="admin-empty">No messages in this topic yet.</p>';
-      return;
-    }
-    container.innerHTML = messages
-      .map(function (message) {
-        return (
-          '<div class="admin-message" data-id="' + escapeAttr(message.id) + '">' +
-          '<div class="admin-message__body">' +
-          '<p class="admin-message__meta">' +
-          "<strong>" + escapeHtml(message.author_name) + "</strong> — " +
-          formatDate(message.created_at) +
-          "</p>" +
-          "<p>" + escapeHtml(message.body) + "</p>" +
-          "</div>" +
-          '<button type="button" class="admin-listing__delete admin-message__delete" data-id="' +
-          escapeAttr(message.id) +
-          '">Delete</button>' +
-          "</div>"
-        );
-      })
-      .join("");
-  }
-
-  function loadMessagesForSelectedTopic() {
-    var select = document.getElementById("moderation-topic-select");
-    var statusEl = document.getElementById("messages-status");
-    var container = document.getElementById("admin-messages");
-    var topicId = select.value;
-
-    if (!topicId) {
-      statusEl.textContent = "";
-      container.innerHTML = "";
-      return;
-    }
-
-    statusEl.textContent = "Loading...";
-    fetchJson("/api/discussion-messages?topic=" + encodeURIComponent(topicId) + "&_=" + Date.now())
-      .then(function (data) {
-        statusEl.textContent = "";
-        renderMessages((data && data.messages) || []);
       })
       .catch(function (err) {
         statusEl.textContent = err.message;
@@ -364,7 +238,6 @@
       lockSection.hidden = true;
       contentSection.hidden = false;
       loadListings();
-      loadTopics();
     }
 
     function tryStoredPassword() {
@@ -484,67 +357,6 @@
         .then(function () {
           if (listingIdField.value === id) exitEditMode();
           loadListings();
-        })
-        .catch(function (err) {
-          window.alert("Error: " + err.message);
-          button.disabled = false;
-          button.textContent = "Delete";
-        });
-    });
-
-    var topicForm = document.getElementById("topic-form");
-    var topicFormStatus = document.getElementById("topic-form-status");
-
-    topicForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      var title = document.getElementById("topic-title").value.trim();
-      var description = document.getElementById("topic-description").value.trim();
-
-      topicFormStatus.textContent = "Adding...";
-      apiRequest("/api/discussion-topic-create", { title: title, description: description })
-        .then(function () {
-          topicFormStatus.textContent = "Added!";
-          topicForm.reset();
-          loadTopics();
-        })
-        .catch(function (err) {
-          topicFormStatus.textContent = "Error: " + err.message;
-        });
-    });
-
-    document.getElementById("admin-topics").addEventListener("click", function (event) {
-      var button = event.target.closest(".admin-topic__delete");
-      if (!button) return;
-      var id = button.getAttribute("data-id");
-      if (!window.confirm("Delete this topic and all its messages?")) return;
-      button.disabled = true;
-      button.textContent = "Deleting...";
-      apiRequest("/api/discussion-topic-delete", { id: id })
-        .then(function () {
-          loadTopics();
-          loadMessagesForSelectedTopic();
-        })
-        .catch(function (err) {
-          window.alert("Error: " + err.message);
-          button.disabled = false;
-          button.textContent = "Delete";
-        });
-    });
-
-    document
-      .getElementById("moderation-topic-select")
-      .addEventListener("change", loadMessagesForSelectedTopic);
-
-    document.getElementById("admin-messages").addEventListener("click", function (event) {
-      var button = event.target.closest(".admin-message__delete");
-      if (!button) return;
-      var id = button.getAttribute("data-id");
-      if (!window.confirm("Delete this message?")) return;
-      button.disabled = true;
-      button.textContent = "Deleting...";
-      apiRequest("/api/discussion-message-delete", { id: id })
-        .then(function () {
-          loadMessagesForSelectedTopic();
         })
         .catch(function (err) {
           window.alert("Error: " + err.message);
