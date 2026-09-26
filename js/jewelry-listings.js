@@ -4,10 +4,12 @@
 // its own "Buy" button wired to the shared checkout modal (see
 // js/checkout-modal.js) via data-item-* attributes.
 //
-// A listing can have several photos: each card is a small carousel
-// (left/right arrows, shown only when there's more than one image),
-// and clicking the current photo opens it full-size in a lightbox with
-// its own left/right navigation over the same image set.
+// A listing can have several photos and (optionally) a couple of short
+// video clips: each card is a small carousel over that combined media
+// set (left/right arrows, shown only when there's more than one item),
+// images first then videos. Clicking the current slide opens it
+// full-size in a lightbox with its own left/right navigation over the
+// same media set.
 
 (function () {
   var escapeHtml = window.FogDomUtils.escapeHtml;
@@ -15,8 +17,16 @@
 
   var itemsById = {};
 
-  function itemImages(item) {
-    return item.images && item.images.length ? item.images : item.image ? [item.image] : [];
+  function itemMedia(item) {
+    var images = item.images && item.images.length ? item.images : item.image ? [item.image] : [];
+    var videos = item.videos && item.videos.length ? item.videos : [];
+    return images.map(function (path) {
+      return { path: path, type: "image" };
+    }).concat(
+      videos.map(function (path) {
+        return { path: path, type: "video" };
+      })
+    );
   }
 
   function formatPrice(value) {
@@ -28,22 +38,38 @@
     return imagePath ? "background-image: url(" + JSON.stringify(imagePath) + ")" : "";
   }
 
+  function slideMarkup(media, index) {
+    if (media.type === "video") {
+      return (
+        '<div class="listing-card__slide listing-card__video-wrap" data-index="' + index + '" ' +
+        'data-type="video" tabindex="0" role="button" aria-label="Play video">' +
+        '<video class="listing-card__video-el" src="' + escapeAttr(media.path) + '" ' +
+        'muted playsinline preload="metadata"></video>' +
+        '<span class="listing-card__play-icon" aria-hidden="true">&#9658;</span>' +
+        "</div>"
+      );
+    }
+    return (
+      '<div class="listing-card__slide listing-card__image" data-index="' + index + '" ' +
+      'data-type="image" tabindex="0" role="button" aria-label="View full image" style="' +
+      escapeAttr(backgroundStyleFor(media.path)) +
+      '"></div>'
+    );
+  }
+
   function renderCard(item) {
     itemsById[item.id] = item;
-    var images = itemImages(item);
+    var media = itemMedia(item);
     var priceStr = (Number(item.price) || 0).toFixed(2);
     var subject = "New order: Jewelry — " + item.title + " ($" + priceStr + ")";
 
     var carousel =
       '<div class="listing-card__carousel">' +
-      '<div class="listing-card__image" data-index="0" tabindex="0" role="button" ' +
-      'aria-label="View full image" style="' +
-      escapeAttr(backgroundStyleFor(images[0])) +
-      '"></div>' +
-      (images.length > 1
-        ? '<button type="button" class="listing-card__arrow listing-card__arrow--prev" aria-label="Previous image">&#10094;</button>' +
-          '<button type="button" class="listing-card__arrow listing-card__arrow--next" aria-label="Next image">&#10095;</button>' +
-          '<p class="listing-card__counter">1 / ' + images.length + "</p>"
+      slideMarkup(media[0] || { path: "", type: "image" }, 0) +
+      (media.length > 1
+        ? '<button type="button" class="listing-card__arrow listing-card__arrow--prev" aria-label="Previous item">&#10094;</button>' +
+          '<button type="button" class="listing-card__arrow listing-card__arrow--next" aria-label="Next item">&#10095;</button>' +
+          '<p class="listing-card__counter">1 / ' + media.length + "</p>"
         : "") +
       "</div>";
 
@@ -87,22 +113,30 @@
 
     // ---------- Card carousels ----------
 
-    function setCardImage(imageEl, images, index) {
-      imageEl.setAttribute("data-index", String(index));
-      imageEl.style.backgroundImage = images[index] ? "url(" + JSON.stringify(images[index]) + ")" : "";
-      var counter = imageEl.parentElement.querySelector(".listing-card__counter");
-      if (counter) counter.textContent = index + 1 + " / " + images.length;
+    function setCardMedia(carousel, media, index) {
+      var wrapped = (index + media.length) % media.length;
+      var oldSlide = carousel.querySelector(".listing-card__slide");
+      if (oldSlide) {
+        var oldVideo = oldSlide.querySelector("video");
+        if (oldVideo) oldVideo.pause();
+        oldSlide.remove();
+      }
+      var wrapper = document.createElement("div");
+      wrapper.innerHTML = slideMarkup(media[wrapped], wrapped);
+      carousel.insertBefore(wrapper.firstChild, carousel.firstChild);
+      var counter = carousel.querySelector(".listing-card__counter");
+      if (counter) counter.textContent = wrapped + 1 + " / " + media.length;
     }
 
     function stepCard(card, delta) {
       var item = itemsById[card.getAttribute("data-id")];
       if (!item) return;
-      var images = itemImages(item);
-      if (images.length < 2) return;
-      var imageEl = card.querySelector(".listing-card__image");
-      var current = parseInt(imageEl.getAttribute("data-index"), 10) || 0;
-      var next = (current + delta + images.length) % images.length;
-      setCardImage(imageEl, images, next);
+      var media = itemMedia(item);
+      if (media.length < 2) return;
+      var carousel = card.querySelector(".listing-card__carousel");
+      var slide = carousel.querySelector(".listing-card__slide");
+      var current = parseInt(slide.getAttribute("data-index"), 10) || 0;
+      setCardMedia(carousel, media, current + delta);
     }
 
     grid.addEventListener("click", function (event) {
@@ -116,46 +150,65 @@
         stepCard(nextBtn.closest(".listing-card"), 1);
         return;
       }
-      var imageEl = event.target.closest(".listing-card__image");
-      if (imageEl) {
-        var card = imageEl.closest(".listing-card");
+      var slideEl = event.target.closest(".listing-card__slide");
+      if (slideEl) {
+        var card = slideEl.closest(".listing-card");
         var item = itemsById[card.getAttribute("data-id")];
         if (!item) return;
-        var index = parseInt(imageEl.getAttribute("data-index"), 10) || 0;
-        openLightbox(itemImages(item), index, imageEl);
+        var index = parseInt(slideEl.getAttribute("data-index"), 10) || 0;
+        openLightbox(itemMedia(item), index, slideEl);
       }
     });
 
     grid.addEventListener("keydown", function (event) {
       if (event.key !== "Enter" && event.key !== " ") return;
-      var imageEl = event.target.closest(".listing-card__image");
-      if (!imageEl) return;
+      var slideEl = event.target.closest(".listing-card__slide");
+      if (!slideEl) return;
       event.preventDefault();
-      var card = imageEl.closest(".listing-card");
+      var card = slideEl.closest(".listing-card");
       var item = itemsById[card.getAttribute("data-id")];
       if (!item) return;
-      var index = parseInt(imageEl.getAttribute("data-index"), 10) || 0;
-      openLightbox(itemImages(item), index, imageEl);
+      var index = parseInt(slideEl.getAttribute("data-index"), 10) || 0;
+      openLightbox(itemMedia(item), index, slideEl);
     });
 
     // ---------- Lightbox ----------
 
     var lightbox = document.getElementById("lightbox");
     var lightboxImage = document.getElementById("lightbox-image");
+    var lightboxVideo = document.getElementById("lightbox-video");
     var lightboxCounter = document.getElementById("lightbox-counter");
     var lightboxPrev = document.getElementById("lightbox-prev");
     var lightboxNext = document.getElementById("lightbox-next");
     var lightboxCloseTriggers = lightbox ? lightbox.querySelectorAll("[data-lightbox-close]") : [];
 
-    var lightboxImages = [];
+    var lightboxMedia = [];
     var lightboxIndex = 0;
     var lightboxOpener = null;
 
-    function showLightboxImage(index) {
-      lightboxIndex = (index + lightboxImages.length) % lightboxImages.length;
-      lightboxImage.src = lightboxImages[lightboxIndex];
-      lightboxCounter.textContent = lightboxImages.length > 1 ? lightboxIndex + 1 + " / " + lightboxImages.length : "";
-      var showArrows = lightboxImages.length > 1;
+    function showLightboxMedia(index) {
+      lightboxIndex = (index + lightboxMedia.length) % lightboxMedia.length;
+      var media = lightboxMedia[lightboxIndex];
+
+      if (!lightboxVideo.paused) lightboxVideo.pause();
+
+      if (media.type === "video") {
+        lightboxImage.hidden = true;
+        lightboxImage.src = "";
+        lightboxVideo.hidden = false;
+        if (lightboxVideo.getAttribute("src") !== media.path) {
+          lightboxVideo.src = media.path;
+        }
+      } else {
+        lightboxVideo.hidden = true;
+        lightboxVideo.removeAttribute("src");
+        lightboxVideo.load();
+        lightboxImage.hidden = false;
+        lightboxImage.src = media.path;
+      }
+
+      lightboxCounter.textContent = lightboxMedia.length > 1 ? lightboxIndex + 1 + " / " + lightboxMedia.length : "";
+      var showArrows = lightboxMedia.length > 1;
       lightboxPrev.hidden = !showArrows;
       lightboxNext.hidden = !showArrows;
     }
@@ -164,17 +217,17 @@
       if (event.key === "Escape") {
         closeLightbox();
       } else if (event.key === "ArrowLeft") {
-        showLightboxImage(lightboxIndex - 1);
+        showLightboxMedia(lightboxIndex - 1);
       } else if (event.key === "ArrowRight") {
-        showLightboxImage(lightboxIndex + 1);
+        showLightboxMedia(lightboxIndex + 1);
       }
     }
 
-    function openLightbox(images, startIndex, opener) {
-      if (!lightbox || !images.length) return;
-      lightboxImages = images;
+    function openLightbox(media, startIndex, opener) {
+      if (!lightbox || !media.length) return;
+      lightboxMedia = media;
       lightboxOpener = opener;
-      showLightboxImage(startIndex);
+      showLightboxMedia(startIndex);
       lightbox.hidden = false;
       document.body.style.overflow = "hidden";
       document.addEventListener("keydown", onLightboxKeydown);
@@ -183,6 +236,7 @@
 
     function closeLightbox() {
       if (!lightbox) return;
+      lightboxVideo.pause();
       lightbox.hidden = true;
       document.body.style.overflow = "";
       document.removeEventListener("keydown", onLightboxKeydown);
@@ -191,10 +245,10 @@
 
     if (lightbox) {
       lightboxPrev.addEventListener("click", function () {
-        showLightboxImage(lightboxIndex - 1);
+        showLightboxMedia(lightboxIndex - 1);
       });
       lightboxNext.addEventListener("click", function () {
-        showLightboxImage(lightboxIndex + 1);
+        showLightboxMedia(lightboxIndex + 1);
       });
       Array.prototype.forEach.call(lightboxCloseTriggers, function (trigger) {
         trigger.addEventListener("click", closeLightbox);

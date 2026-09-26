@@ -2,7 +2,7 @@
 // Body: { id }
 //
 // Removes the listing from data/jewelry-listings.json and deletes all of
-// its image files, both directly on the `main` branch.
+// its image and video files, both directly on the `main` branch.
 
 import {
   DATA_PATH,
@@ -47,6 +47,14 @@ export async function handleDelete(request, env) {
       const imageFile = await githubGetFile(env, imagePath);
       if (imageFile) {
         await githubDeleteFile(env, imagePath, `Remove jewelry listing image: ${target.title}`, imageFile.sha);
+      }
+    }
+
+    const videosToDelete = target.videos && target.videos.length ? target.videos : [];
+    for (const videoPath of videosToDelete) {
+      const videoFile = await githubGetFile(env, videoPath);
+      if (videoFile) {
+        await githubDeleteFile(env, videoPath, `Remove jewelry listing video: ${target.title}`, videoFile.sha);
       }
     }
 

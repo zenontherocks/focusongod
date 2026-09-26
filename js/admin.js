@@ -1,12 +1,13 @@
 // Jewelry admin console: password gate, add/edit/delete listings, each
-// with up to MAX_LISTING_IMAGES photos. Talks to the Cloudflare Worker
-// routes under src/routes/jewelry-*.js, which commit changes straight
-// to the site's GitHub repo.
+// with up to MAX_LISTING_IMAGES photos and up to MAX_LISTING_VIDEOS short
+// video clips. Talks to the Cloudflare Worker routes under
+// src/routes/jewelry-*.js, which commit changes straight to the site's
+// GitHub repo.
 //
 // The "Add a new listing" form doubles as the edit form: clicking a
 // listing's Edit button repopulates it (title/description/price, plus
-// its existing photos as removable thumbnails) and switches it into
-// edit mode until submitted or cancelled.
+// its existing photos/videos as removable thumbnails) and switches it
+// into edit mode until submitted or cancelled.
 
 (function () {
   var escapeHtml = window.FogDomUtils.escapeHtml;
@@ -15,6 +16,8 @@
   var MAX_DIMENSION = 1200;
   var JPEG_QUALITY = 0.82;
   var MAX_LISTING_IMAGES = 8; // keep in sync with MAX_IMAGES in src/routes/jewelry-create.js
+  var MAX_LISTING_VIDEOS = 2; // keep in sync with MAX_VIDEOS in src/routes/jewelry-create.js
+  var MAX_VIDEO_BYTES = 8 * 1024 * 1024; // keep in sync with MAX_VIDEO_BYTES in src/routes/jewelry-create.js
 
   function getStoredPassword() {
     try {
@@ -53,6 +56,19 @@
         reject(new Error("Could not read that image file."));
       };
       img.src = url;
+    });
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        resolve(reader.result);
+      };
+      reader.onerror = function () {
+        reject(new Error("Could not read that video file."));
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -99,6 +115,10 @@
     return item.images && item.images.length ? item.images : item.image ? [item.image] : [];
   }
 
+  function itemVideos(item) {
+    return item.videos && item.videos.length ? item.videos : [];
+  }
+
   var listingsById = {};
 
   function renderListings(items) {
@@ -114,6 +134,7 @@
     container.innerHTML = items
       .map(function (item) {
         var images = itemImages(item);
+        var videos = itemVideos(item);
         var imageStyle = images.length
           ? ' style="background-image: url(\'' + escapeHtml(images[0]) + "')\""
           : "";
@@ -122,6 +143,9 @@
           '<div class="admin-listing__image"' + imageStyle + ">" +
           (images.length > 1
             ? '<span class="admin-listing__image-count">+' + (images.length - 1) + "</span>"
+            : "") +
+          (videos.length
+            ? '<span class="admin-listing__video-count">&#9658;' + videos.length + "</span>"
             : "") +
           "</div>" +
           '<div class="admin-listing__body">' +
@@ -176,33 +200,45 @@
     var existingImagesContainer = document.getElementById("listing-existing-images");
 
     var editKeepImages = []; // mutable while editing: images kept if the form is submitted
+    var editKeepVideos = []; // mutable while editing: videos kept if the form is submitted
 
-    function renderExistingImages() {
-      existingImagesContainer.innerHTML = editKeepImages
-        .map(function (path) {
-          return (
-            '<div class="admin-existing-image" data-path="' + escapeAttr(path) + '">' +
-            '<div class="admin-existing-image__thumb" style="background-image: url(\'' +
-            escapeHtml(path) +
-            "')\"></div>" +
-            '<button type="button" class="admin-existing-image__remove" aria-label="Remove this photo">&times;</button>' +
-            "</div>"
-          );
-        })
-        .join("");
+    function renderExistingMedia() {
+      var imageItems = editKeepImages.map(function (path) {
+        return (
+          '<div class="admin-existing-image" data-path="' + escapeAttr(path) + '" data-type="image">' +
+          '<div class="admin-existing-image__thumb" style="background-image: url(\'' +
+          escapeHtml(path) +
+          "')\"></div>" +
+          '<button type="button" class="admin-existing-image__remove" aria-label="Remove this photo">&times;</button>' +
+          "</div>"
+        );
+      });
+      var videoItems = editKeepVideos.map(function (path) {
+        return (
+          '<div class="admin-existing-image" data-path="' + escapeAttr(path) + '" data-type="video">' +
+          '<video class="admin-existing-image__thumb admin-existing-image__video" src="' +
+          escapeAttr(path) +
+          '" muted preload="metadata"></video>' +
+          '<button type="button" class="admin-existing-image__remove" aria-label="Remove this video">&times;</button>' +
+          "</div>"
+        );
+      });
+      existingImagesContainer.innerHTML = imageItems.concat(videoItems).join("");
     }
 
     function enterEditMode(item) {
       listingIdField.value = item.id;
       editKeepImages = itemImages(item).slice();
+      editKeepVideos = itemVideos(item).slice();
       document.getElementById("listing-title").value = item.title || "";
       document.getElementById("listing-description").value = item.description || "";
       document.getElementById("listing-price").value = item.price != null ? item.price : "";
       document.getElementById("listing-image").value = "";
 
       existingImagesRow.hidden = false;
-      renderExistingImages();
-      listingImageLabel.textContent = "Add more photos (optional, up to " + MAX_LISTING_IMAGES + " total)";
+      renderExistingMedia();
+      listingImageLabel.textContent =
+        "Add more photos/videos (optional, up to " + MAX_LISTING_IMAGES + " photos / " + MAX_LISTING_VIDEOS + " videos total)";
       listingFormHeading.textContent = "Edit listing";
       listingFormSubmit.textContent = "Save Changes";
       listingFormCancel.hidden = false;
@@ -213,9 +249,11 @@
     function exitEditMode() {
       listingIdField.value = "";
       editKeepImages = [];
+      editKeepVideos = [];
       existingImagesRow.hidden = true;
       existingImagesContainer.innerHTML = "";
-      listingImageLabel.textContent = "Photos * (up to " + MAX_LISTING_IMAGES + ")";
+      listingImageLabel.textContent =
+        "Photos * (up to " + MAX_LISTING_IMAGES + ") and videos (optional, up to " + MAX_LISTING_VIDEOS + ", 8MB each)";
       listingFormHeading.textContent = "Add a new listing";
       listingFormSubmit.textContent = "Add Listing";
       listingFormCancel.hidden = true;
@@ -227,11 +265,19 @@
     existingImagesContainer.addEventListener("click", function (event) {
       var button = event.target.closest(".admin-existing-image__remove");
       if (!button) return;
-      var path = button.closest(".admin-existing-image").getAttribute("data-path");
-      editKeepImages = editKeepImages.filter(function (p) {
-        return p !== path;
-      });
-      renderExistingImages();
+      var wrap = button.closest(".admin-existing-image");
+      var path = wrap.getAttribute("data-path");
+      var type = wrap.getAttribute("data-type");
+      if (type === "video") {
+        editKeepVideos = editKeepVideos.filter(function (p) {
+          return p !== path;
+        });
+      } else {
+        editKeepImages = editKeepImages.filter(function (p) {
+          return p !== path;
+        });
+      }
+      renderExistingMedia();
     });
 
     function unlock() {
@@ -274,8 +320,28 @@
       var files = Array.prototype.slice.call(fileInput.files);
       var editingId = listingIdField.value;
 
+      var imageFiles = files.filter(function (f) {
+        return f.type.indexOf("image/") === 0;
+      });
+      var videoFiles = files.filter(function (f) {
+        return f.type.indexOf("video/") === 0;
+      });
+      if (imageFiles.length + videoFiles.length !== files.length) {
+        listingStatus.textContent = "Please choose only image or video files.";
+        return;
+      }
+      var oversizedVideo = videoFiles.filter(function (f) {
+        return f.size > MAX_VIDEO_BYTES;
+      });
+      if (oversizedVideo.length) {
+        listingStatus.textContent =
+          "Each video must be under " + MAX_VIDEO_BYTES / (1024 * 1024) + "MB (" + oversizedVideo[0].name + " is too large).";
+        return;
+      }
+
       if (editingId) {
-        var totalImages = editKeepImages.length + files.length;
+        var totalImages = editKeepImages.length + imageFiles.length;
+        var totalVideos = editKeepVideos.length + videoFiles.length;
         if (totalImages === 0) {
           listingStatus.textContent = "A listing needs at least one photo.";
           return;
@@ -284,18 +350,24 @@
           listingStatus.textContent = "A listing can have at most " + MAX_LISTING_IMAGES + " photos total.";
           return;
         }
+        if (totalVideos > MAX_LISTING_VIDEOS) {
+          listingStatus.textContent = "A listing can have at most " + MAX_LISTING_VIDEOS + " videos total.";
+          return;
+        }
 
         listingStatus.textContent = "Saving...";
 
-        Promise.all(files.map(resizeImageFile))
-          .then(function (newImageDataUrls) {
+        Promise.all([Promise.all(imageFiles.map(resizeImageFile)), Promise.all(videoFiles.map(readFileAsDataUrl))])
+          .then(function (results) {
             return apiRequest("/api/jewelry-update", {
               id: editingId,
               title: title,
               description: description,
               price: price,
               keepImages: editKeepImages,
-              newImageDataUrls: newImageDataUrls,
+              newImageDataUrls: results[0],
+              keepVideos: editKeepVideos,
+              newVideoDataUrls: results[1],
             });
           })
           .then(function () {
@@ -309,24 +381,29 @@
         return;
       }
 
-      if (!files.length) {
+      if (!imageFiles.length) {
         listingStatus.textContent = "Please choose at least one photo.";
         return;
       }
-      if (files.length > MAX_LISTING_IMAGES) {
+      if (imageFiles.length > MAX_LISTING_IMAGES) {
         listingStatus.textContent = "Please choose at most " + MAX_LISTING_IMAGES + " photos.";
+        return;
+      }
+      if (videoFiles.length > MAX_LISTING_VIDEOS) {
+        listingStatus.textContent = "Please choose at most " + MAX_LISTING_VIDEOS + " videos.";
         return;
       }
 
       listingStatus.textContent = "Uploading...";
 
-      Promise.all(files.map(resizeImageFile))
-        .then(function (imageDataUrls) {
+      Promise.all([Promise.all(imageFiles.map(resizeImageFile)), Promise.all(videoFiles.map(readFileAsDataUrl))])
+        .then(function (results) {
           return apiRequest("/api/jewelry-create", {
             title: title,
             description: description,
             price: price,
-            imageDataUrls: imageDataUrls,
+            imageDataUrls: results[0],
+            videoDataUrls: results[1],
           });
         })
         .then(function () {

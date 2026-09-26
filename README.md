@@ -183,19 +183,26 @@ and removing listings — no third party involved at all.
 
 - `admin.html` + `js/admin.js` — the console itself. Enter the admin
   password once (stored in `sessionStorage`, so it's re-asked each new
-  browser session) to unlock a form (photos, title, optional
+  browser session) to unlock a form (photos, videos, title, optional
   description, price) and a list of current listings, each with Edit
-  and Delete buttons. A listing can have **up to 8 photos** — the file
-  input accepts multiple files, each resized/compressed client-side
-  (max 1200px on the long edge, JPEG) before upload, to keep things
-  fast and the repo lean. A listing with more than one photo shows a
-  small "+N" badge on its thumbnail in the admin list.
+  and Delete buttons. A listing can have **up to 8 photos** and **up to
+  2 short videos** — one file input accepts a mix of both (multiple
+  files), each photo resized/compressed client-side (max 1200px on the
+  long edge, JPEG) before upload, to keep things fast and the repo lean.
+  Videos aren't compressed client-side (no build tools on this site to
+  run something like ffmpeg.wasm) — instead each is capped at **8MB**,
+  chosen to stay well under Cloudflare Workers' 128MB memory ceiling
+  once you account for base64 inflation and multiple in-memory copies
+  during upload. A listing with more than one photo/video shows a small
+  "+N" badge (and a video-count badge) on its thumbnail in the admin
+  list.
   - Clicking **Edit** repopulates the same form (title, description,
-    price, and the listing's current photos as removable thumbnails —
-    click a thumbnail's &times; to drop it) instead of a separate
-    dialog, and switches the submit button to "Save Changes" with a
-    "Cancel Edit" button to back out. New photos can be added alongside
-    whatever existing ones are kept, up to 8 total.
+    price, and the listing's current photos/videos as removable
+    thumbnails — click a thumbnail's &times; to drop it) instead of a
+    separate dialog, and switches the submit button to "Save Changes"
+    with a "Cancel Edit" button to back out. New photos/videos can be
+    added alongside whatever existing ones are kept, up to 8 photos / 2
+    videos total.
 - This site actually deploys as a **Cloudflare Worker with static
   assets** (not classic "Pages" — that distinction matters for how the
   backend is wired up). `wrangler.jsonc` at the repo root configures
@@ -210,23 +217,27 @@ and removing listings — no third party involved at all.
   implemented in `src/routes/`, shared GitHub-API helpers in
   `src/lib/github.js`) to the matching handler. They check the
   password, then use the GitHub Contents API to commit the
-  added/removed image(s) (`images/jewelry/<id>-<index-or-suffix>.<ext>`)
-  and the updated `data/jewelry-listings.json` **directly to `main`**
-  — which triggers a normal deploy, same as any other change to this
-  site. That means adding, editing, or deleting a listing takes roughly
-  **30-90 seconds** to actually appear live (a real deploy happens, and
-  with several photos, several GitHub API calls happen first) — that's
-  expected, not a bug. Editing only deletes the specific photos you
-  removed and only uploads the specific photos you added — untouched
-  photos are left alone.
+  added/removed image(s)/video(s)
+  (`images/jewelry/<id>-<index-or-suffix>.<ext>` and
+  `videos/jewelry/<id>-<index-or-suffix>.<ext>`) and the updated
+  `data/jewelry-listings.json` **directly to `main`** — which triggers a
+  normal deploy, same as any other change to this site. That means
+  adding, editing, or deleting a listing takes roughly **30-90 seconds**
+  to actually appear live (a real deploy happens, and with several
+  photos/videos, several GitHub API calls happen first) — that's
+  expected, not a bug. Editing only deletes the specific photos/videos
+  you removed and only uploads the specific ones you added — untouched
+  files are left alone.
 - `js/jewelry-listings.js` — renders `data/jewelry-listings.json` into
   the grid of cards on `jewelry.html` (title, price, description, and
-  each listing's `images` array). A listing with more than one photo
-  gets left/right arrows and a "1 / N" counter directly on its card;
-  clicking the current photo opens it full-size in a lightbox with its
-  own left/right arrows (also usable via the ArrowLeft/ArrowRight keys)
-  — closes via its X button, clicking outside it, or Escape, same
-  convention as the checkout popup.
+  each listing's combined `images`/`videos`). A listing with more than
+  one photo/video gets left/right arrows and a "1 / N" counter directly
+  on its card (photos first, then videos); video slides show a muted,
+  silent preview with a play-icon overlay. Clicking the current
+  photo/video opens it full-size in a lightbox (with real playback
+  controls for video) with its own left/right arrows (also usable via
+  the ArrowLeft/ArrowRight keys) — closes via its X button, clicking
+  outside it, or Escape, same convention as the checkout popup.
 
 **One-time setup required** (two secrets in the Cloudflare dashboard —
 Workers & Pages → this project → Settings → Variables and secrets —
