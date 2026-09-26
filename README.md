@@ -185,8 +185,9 @@ and removing listings — no third party involved at all.
   password once (stored in `sessionStorage`, so it's re-asked each new
   browser session) to unlock a form (photos, videos, title, optional
   description, price) and a list of current listings, each with Edit
-  and Delete buttons. A listing can have **up to 8 photos** and **up to
-  2 short videos** — one file input accepts a mix of both (multiple
+  and Delete buttons. A listing needs **at least one photo or video**
+  (either alone is fine) and can have **up to 8 photos** and **up to 2
+  short videos** — one file input accepts a mix of both (multiple
   files), each photo resized/compressed client-side (max 1200px on the
   long edge, JPEG) before upload, to keep things fast and the repo lean.
   Videos aren't compressed client-side (no build tools on this site to
@@ -196,6 +197,15 @@ and removing listings — no third party involved at all.
   during upload. A listing with more than one photo/video shows a small
   "+N" badge (and a video-count badge) on its thumbnail in the admin
   list.
+  - **HEVC videos are rejected at upload time.** iPhones default to
+    recording video as HEVC (H.265), which every major browser besides
+    Safari fails to decode at all — not a quality issue, just a silent
+    "no supported format" failure once it's live. Since this site has no
+    build tooling to transcode video, both the admin console (before
+    upload) and the server (as a backstop) check for HEVC and reject it
+    with a message pointing to the fix: iPhone Settings → Camera →
+    Formats → "Most Compatible", which records H.264 instead — then
+    re-record or re-export and try again.
   - Clicking **Edit** repopulates the same form (title, description,
     price, and the listing's current photos/videos as removable
     thumbnails — click a thumbnail's &times; to drop it) instead of a

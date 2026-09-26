@@ -72,6 +72,47 @@
     });
   }
 
+  // iPhones default to recording HEVC (H.265), which every major browser
+  // besides Safari fails to decode at all — not a quality issue, just a
+  // silent "no supported format" failure. There's no way to transcode on
+  // this no-build-tools static site, so we catch it here before wasting
+  // an upload (and a commit) on a video most visitors couldn't watch.
+  // HEVC/H.265 tracks in an MP4 container are tagged with an "hvc1" or
+  // "hev1" fourcc — cheap to check for directly in the raw bytes.
+  function containsHevc(arrayBuffer) {
+    var bytes = new Uint8Array(arrayBuffer);
+    var markers = ["hvc1", "hev1"].map(function (s) {
+      return [s.charCodeAt(0), s.charCodeAt(1), s.charCodeAt(2), s.charCodeAt(3)];
+    });
+    for (var i = 0; i < bytes.length - 3; i++) {
+      for (var m = 0; m < markers.length; m++) {
+        var mk = markers[m];
+        if (bytes[i] === mk[0] && bytes[i + 1] === mk[1] && bytes[i + 2] === mk[2] && bytes[i + 3] === mk[3]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function checkHevcAndReadVideos(videoFiles) {
+    return Promise.all(
+      videoFiles.map(function (file) {
+        return file.arrayBuffer().then(function (buffer) {
+          if (containsHevc(buffer)) {
+            throw new Error(
+              'The video "' +
+                file.name +
+                "\" uses HEVC/H.265 encoding, which most browsers besides Safari can't play. " +
+                'On iPhone: Settings → Camera → Formats → "Most Compatible", then re-record or re-export and try again.'
+            );
+          }
+          return readFileAsDataUrl(file);
+        });
+      })
+    );
+  }
+
   function apiRequest(path, body) {
     return fetch(path, {
       method: "POST",
@@ -253,7 +294,7 @@
       existingImagesRow.hidden = true;
       existingImagesContainer.innerHTML = "";
       listingImageLabel.textContent =
-        "Photos * (up to " + MAX_LISTING_IMAGES + ") and videos (optional, up to " + MAX_LISTING_VIDEOS + ", 8MB each)";
+        "Photos and/or videos * (up to " + MAX_LISTING_IMAGES + " photos / " + MAX_LISTING_VIDEOS + " videos, 8MB each video)";
       listingFormHeading.textContent = "Add a new listing";
       listingFormSubmit.textContent = "Add Listing";
       listingFormCancel.hidden = true;
@@ -342,8 +383,8 @@
       if (editingId) {
         var totalImages = editKeepImages.length + imageFiles.length;
         var totalVideos = editKeepVideos.length + videoFiles.length;
-        if (totalImages === 0) {
-          listingStatus.textContent = "A listing needs at least one photo.";
+        if (totalImages === 0 && totalVideos === 0) {
+          listingStatus.textContent = "A listing needs at least one photo or video.";
           return;
         }
         if (totalImages > MAX_LISTING_IMAGES) {
@@ -357,7 +398,7 @@
 
         listingStatus.textContent = "Saving...";
 
-        Promise.all([Promise.all(imageFiles.map(resizeImageFile)), Promise.all(videoFiles.map(readFileAsDataUrl))])
+        Promise.all([Promise.all(imageFiles.map(resizeImageFile)), checkHevcAndReadVideos(videoFiles)])
           .then(function (results) {
             return apiRequest("/api/jewelry-update", {
               id: editingId,
@@ -381,8 +422,8 @@
         return;
       }
 
-      if (!imageFiles.length) {
-        listingStatus.textContent = "Please choose at least one photo.";
+      if (!imageFiles.length && !videoFiles.length) {
+        listingStatus.textContent = "Please choose at least one photo or video.";
         return;
       }
       if (imageFiles.length > MAX_LISTING_IMAGES) {
@@ -396,7 +437,7 @@
 
       listingStatus.textContent = "Uploading...";
 
-      Promise.all([Promise.all(imageFiles.map(resizeImageFile)), Promise.all(videoFiles.map(readFileAsDataUrl))])
+      Promise.all([Promise.all(imageFiles.map(resizeImageFile)), checkHevcAndReadVideos(videoFiles)])
         .then(function (results) {
           return apiRequest("/api/jewelry-create", {
             title: title,

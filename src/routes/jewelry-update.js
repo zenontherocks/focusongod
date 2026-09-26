@@ -1,16 +1,17 @@
 // POST /api/jewelry-update
 // Body: { id, title, description, price, keepImages, newImageDataUrls, keepVideos, newVideoDataUrls }
 // Admin-only. Edits an existing listing's title/description/price and its
-// photo set: keepImages is the subset (in order) of the listing's current
-// images to retain, newImageDataUrls is a (possibly empty) array of new
-// base64 data URLs to add. keepImages.length + newImageDataUrls.length must
-// be between 1 and MAX_IMAGES. keepVideos/newVideoDataUrls work the same
-// way for videos, except the total may be zero (videos are optional) and
-// is capped at MAX_VIDEOS, with each new video capped at MAX_VIDEO_BYTES.
+// media: keepImages/keepVideos are the subsets (in order) of the
+// listing's current images/videos to retain, newImageDataUrls/
+// newVideoDataUrls are (possibly empty) arrays of new base64 data URLs to
+// add. A listing needs at least one image or video (either alone is
+// fine); images are capped at MAX_IMAGES total, videos at MAX_VIDEOS
+// total, each video also capped at MAX_VIDEO_BYTES and rejected if it's
+// HEVC-encoded — see src/lib/video.js for why.
 //
 // New images/videos are uploaded (and the updated listing committed)
-// before any removed ones are deleted, so a failure partway through never
-// leaves the listing referencing a missing file.
+// before any removed ones are deleted, so a failure partway through
+// never leaves the listing referencing a missing file.
 
 import {
   DATA_PATH,
@@ -21,20 +22,13 @@ import {
   githubDeleteFile,
 } from "../lib/github.js";
 import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
+import { MAX_VIDEO_BYTES, parseVideoDataUrl, base64ByteLength, containsHevc } from "../lib/video.js";
 
 const MAX_IMAGES = 8;
 const MAX_VIDEOS = 2;
-// See the matching comment in jewelry-create.js for why 8MB.
-const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
 
 function generateImageSuffix() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-function base64ByteLength(base64) {
-  const len = base64.length;
-  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
-  return (len * 3) / 4 - padding;
 }
 
 export async function handleUpdate(request, env) {
@@ -69,9 +63,6 @@ export async function handleUpdate(request, env) {
   const keepList = Array.isArray(keepImages) ? keepImages : [];
   const newList = Array.isArray(newImageDataUrls) ? newImageDataUrls : [];
   const totalImages = keepList.length + newList.length;
-  if (totalImages === 0) {
-    return jsonResponse({ error: "a listing must have at least one image" }, 400);
-  }
   if (totalImages > MAX_IMAGES) {
     return jsonResponse({ error: `A listing can have at most ${MAX_IMAGES} images` }, 400);
   }
@@ -81,6 +72,10 @@ export async function handleUpdate(request, env) {
   const totalVideos = keepVideoList.length + newVideoList.length;
   if (totalVideos > MAX_VIDEOS) {
     return jsonResponse({ error: `A listing can have at most ${MAX_VIDEOS} videos` }, 400);
+  }
+
+  if (totalImages === 0 && totalVideos === 0) {
+    return jsonResponse({ error: "a listing needs at least one image or video" }, 400);
   }
 
   const parsedNewImages = [];
@@ -96,15 +91,24 @@ export async function handleUpdate(request, env) {
 
   const parsedNewVideos = [];
   for (const videoDataUrl of newVideoList) {
-    const match = /^data:video\/(mp4|webm|quicktime);base64,(.+)$/i.exec(videoDataUrl);
-    if (!match) {
+    const parsed = parseVideoDataUrl(videoDataUrl);
+    if (!parsed) {
       return jsonResponse({ error: "each new video must be a base64 mp4/webm/quicktime data URL" }, 400);
     }
-    const ext = match[1].toLowerCase() === "quicktime" ? "mov" : match[1].toLowerCase();
-    if (base64ByteLength(match[2]) > MAX_VIDEO_BYTES) {
+    if (base64ByteLength(parsed.base64) > MAX_VIDEO_BYTES) {
       return jsonResponse({ error: `each video must be under ${MAX_VIDEO_BYTES / (1024 * 1024)}MB` }, 400);
     }
-    parsedNewVideos.push({ ext, base64Video: match[2] });
+    if (containsHevc(parsed.base64)) {
+      return jsonResponse(
+        {
+          error:
+            "That video is HEVC/H.265-encoded, which most browsers besides Safari can't play. " +
+            'On iPhone: Settings → Camera → Formats → "Most Compatible", then re-record or re-export and try again.',
+        },
+        400
+      );
+    }
+    parsedNewVideos.push({ ext: parsed.ext, base64Video: parsed.base64 });
   }
 
   try {
