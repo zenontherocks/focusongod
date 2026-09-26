@@ -2,10 +2,12 @@
 // Body: { title, description, price, imageDataUrls, videoDataUrls }
 // A listing needs at least one image or video (either alone is fine).
 // imageDataUrls is an array of base64 data URLs (image/png, image/jpeg,
-// or image/webp), up to MAX_IMAGES. videoDataUrls is an array (up to
-// MAX_VIDEOS) of base64 data URLs (video/mp4, video/webm, or
-// video/quicktime), each capped at MAX_VIDEO_BYTES and rejected if it's
-// HEVC-encoded — see src/lib/video.js for why.
+// or image/webp), up to MAX_IMAGES. videoDataUrls is an array of at most
+// MAX_VIDEOS (1) base64 data URLs (video/mp4, video/webm, or
+// video/quicktime), capped at MAX_VIDEO_BYTES and rejected if it's
+// HEVC-encoded — see src/lib/video.js for why. Capped at one video (not
+// more) specifically so that cap could be a more useful 16MB instead of
+// leaving room for a second one in the same request.
 //
 // Commits each image/video to images/jewelry/<id>-<index>.<ext> and
 // appends the new item to data/jewelry-listings.json, both directly on
@@ -23,7 +25,7 @@ import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
 import { MAX_VIDEO_BYTES, parseVideoDataUrl, base64ByteLength, containsHevc } from "../lib/video.js";
 
 const MAX_IMAGES = 8;
-const MAX_VIDEOS = 2;
+const MAX_VIDEOS = 1;
 
 function parsedImage(dataUrl) {
   const match = /^data:image\/(png|jpe?g|webp);base64,(.+)$/i.exec(dataUrl);

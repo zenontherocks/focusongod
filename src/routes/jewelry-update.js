@@ -5,7 +5,7 @@
 // listing's current images/videos to retain, newImageDataUrls/
 // newVideoDataUrls are (possibly empty) arrays of new base64 data URLs to
 // add. A listing needs at least one image or video (either alone is
-// fine); images are capped at MAX_IMAGES total, videos at MAX_VIDEOS
+// fine); images are capped at MAX_IMAGES total, videos at MAX_VIDEOS (1)
 // total, each video also capped at MAX_VIDEO_BYTES and rejected if it's
 // HEVC-encoded — see src/lib/video.js for why.
 //
@@ -25,7 +25,7 @@ import { checkAuth, unauthorized, jsonResponse } from "../lib/http.js";
 import { MAX_VIDEO_BYTES, parseVideoDataUrl, base64ByteLength, containsHevc } from "../lib/video.js";
 
 const MAX_IMAGES = 8;
-const MAX_VIDEOS = 2;
+const MAX_VIDEOS = 1;
 
 function generateImageSuffix() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);

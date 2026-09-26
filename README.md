@@ -186,17 +186,21 @@ and removing listings — no third party involved at all.
   browser session) to unlock a form (photos, videos, title, optional
   description, price) and a list of current listings, each with Edit
   and Delete buttons. A listing needs **at least one photo or video**
-  (either alone is fine) and can have **up to 8 photos** and **up to 2
-  short videos** — one file input accepts a mix of both (multiple
-  files), each photo resized/compressed client-side (max 1200px on the
-  long edge, JPEG) before upload, to keep things fast and the repo lean.
-  Videos aren't compressed client-side (no build tools on this site to
-  run something like ffmpeg.wasm) — instead each is capped at **8MB**,
-  chosen to stay well under Cloudflare Workers' 128MB memory ceiling
-  once you account for base64 inflation and multiple in-memory copies
-  during upload. A listing with more than one photo/video shows a small
-  "+N" badge (and a video-count badge) on its thumbnail in the admin
-  list.
+  (either alone is fine) and can have **up to 8 photos** and **1 short
+  video** — one file input accepts a mix of both (multiple files), each
+  photo resized/compressed client-side (max 1200px on the long edge,
+  JPEG) before upload, to keep things fast and the repo lean. Videos
+  aren't compressed client-side (no build tools on this site to run
+  something like ffmpeg.wasm) — instead the one video a listing can have
+  is capped at **16MB** (roughly 9-10 seconds at a typical phone
+  bitrate), chosen to stay well under Cloudflare Workers' 128MB memory
+  ceiling once you account for base64 inflation and multiple in-memory
+  copies during upload — the cap is deliberately per-listing rather than
+  per-file (i.e. only 1 video allowed, not 2 smaller ones) so it can be
+  this generous without the *combined* size of everything in one upload
+  request (photos + video) risking that ceiling. A listing with more
+  than one photo/video shows a small "+N" badge (and a video badge) on
+  its thumbnail in the admin list.
   - **HEVC videos are rejected at upload time.** iPhones default to
     recording video as HEVC (H.265), which every major browser besides
     Safari fails to decode at all — not a quality issue, just a silent
@@ -211,8 +215,8 @@ and removing listings — no third party involved at all.
     thumbnails — click a thumbnail's &times; to drop it) instead of a
     separate dialog, and switches the submit button to "Save Changes"
     with a "Cancel Edit" button to back out. New photos/videos can be
-    added alongside whatever existing ones are kept, up to 8 photos / 2
-    videos total.
+    added alongside whatever existing ones are kept, up to 8 photos / 1
+    video total.
 - This site actually deploys as a **Cloudflare Worker with static
   assets** (not classic "Pages" — that distinction matters for how the
   backend is wired up). `wrangler.jsonc` at the repo root configures

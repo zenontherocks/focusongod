@@ -1,8 +1,9 @@
 // Jewelry admin console: password gate, add/edit/delete listings, each
-// with up to MAX_LISTING_IMAGES photos and up to MAX_LISTING_VIDEOS short
-// video clips. Talks to the Cloudflare Worker routes under
-// src/routes/jewelry-*.js, which commit changes straight to the site's
-// GitHub repo.
+// with up to MAX_LISTING_IMAGES photos and up to MAX_LISTING_VIDEOS
+// video (kept to just one so its size cap can be a more useful MAX_VIDEO_BYTES
+// instead of leaving room for a second one in the same upload request).
+// Talks to the Cloudflare Worker routes under src/routes/jewelry-*.js,
+// which commit changes straight to the site's GitHub repo.
 //
 // The "Add a new listing" form doubles as the edit form: clicking a
 // listing's Edit button repopulates it (title/description/price, plus
@@ -16,8 +17,8 @@
   var MAX_DIMENSION = 1200;
   var JPEG_QUALITY = 0.82;
   var MAX_LISTING_IMAGES = 8; // keep in sync with MAX_IMAGES in src/routes/jewelry-create.js
-  var MAX_LISTING_VIDEOS = 2; // keep in sync with MAX_VIDEOS in src/routes/jewelry-create.js
-  var MAX_VIDEO_BYTES = 8 * 1024 * 1024; // keep in sync with MAX_VIDEO_BYTES in src/routes/jewelry-create.js
+  var MAX_LISTING_VIDEOS = 1; // keep in sync with MAX_VIDEOS in src/routes/jewelry-create.js
+  var MAX_VIDEO_BYTES = 16 * 1024 * 1024; // keep in sync with MAX_VIDEO_BYTES in src/lib/video.js
 
   function getStoredPassword() {
     try {
@@ -279,7 +280,13 @@
       existingImagesRow.hidden = false;
       renderExistingMedia();
       listingImageLabel.textContent =
-        "Add more photos/videos (optional, up to " + MAX_LISTING_IMAGES + " photos / " + MAX_LISTING_VIDEOS + " videos total)";
+        "Add more photos and/or a video (optional, up to " +
+        MAX_LISTING_IMAGES +
+        " photos / " +
+        MAX_LISTING_VIDEOS +
+        " video total, " +
+        MAX_VIDEO_BYTES / (1024 * 1024) +
+        "MB max)";
       listingFormHeading.textContent = "Edit listing";
       listingFormSubmit.textContent = "Save Changes";
       listingFormCancel.hidden = false;
@@ -294,7 +301,13 @@
       existingImagesRow.hidden = true;
       existingImagesContainer.innerHTML = "";
       listingImageLabel.textContent =
-        "Photos and/or videos * (up to " + MAX_LISTING_IMAGES + " photos / " + MAX_LISTING_VIDEOS + " videos, 8MB each video)";
+        "Photos and/or a video * (up to " +
+        MAX_LISTING_IMAGES +
+        " photos / " +
+        MAX_LISTING_VIDEOS +
+        " video, " +
+        MAX_VIDEO_BYTES / (1024 * 1024) +
+        "MB max)";
       listingFormHeading.textContent = "Add a new listing";
       listingFormSubmit.textContent = "Add Listing";
       listingFormCancel.hidden = true;
@@ -392,7 +405,7 @@
           return;
         }
         if (totalVideos > MAX_LISTING_VIDEOS) {
-          listingStatus.textContent = "A listing can have at most " + MAX_LISTING_VIDEOS + " videos total.";
+          listingStatus.textContent = "A listing can have at most " + MAX_LISTING_VIDEOS + " video.";
           return;
         }
 
@@ -431,7 +444,7 @@
         return;
       }
       if (videoFiles.length > MAX_LISTING_VIDEOS) {
-        listingStatus.textContent = "Please choose at most " + MAX_LISTING_VIDEOS + " videos.";
+        listingStatus.textContent = "Please choose at most " + MAX_LISTING_VIDEOS + " video.";
         return;
       }
 

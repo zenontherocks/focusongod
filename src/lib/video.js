@@ -6,8 +6,13 @@
 // JSON — a single ~20MB video has been enough to crash a Worker in
 // practice once you account for the JSON parse, the substring holding
 // just that video's data, and re-serializing it into the GitHub PUT
-// body all being resident at once. 8MB keeps real headroom under that.
-export const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
+// body all being resident at once. A listing is capped at one video
+// (see MAX_VIDEOS in jewelry-create.js/jewelry-update.js) specifically
+// so this cap could be raised to 16MB — two videos at 16MB each would
+// approach that crash threshold once photos are added to the same
+// request, but one video plus up to 8 (already-compressed) photos
+// keeps real headroom under it.
+export const MAX_VIDEO_BYTES = 16 * 1024 * 1024;
 
 export function parseVideoDataUrl(dataUrl) {
   const match = /^data:video\/(mp4|webm|quicktime);base64,(.+)$/i.exec(dataUrl);
